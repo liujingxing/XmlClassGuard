@@ -102,12 +102,12 @@ xmlClassGuard {
 
 ```xml
 dir mapping:
-	com.ljx.example -> e
-	com.ljx.example.activity -> dh
+    com.ljx.example -> e
+    com.ljx.example.activity -> dh
 
 class mapping:
-	com.ljx.example.AppHolder -> e.B
-	com.ljx.example.activity.MainActivity -> dh.C
+    com.ljx.example.AppHolder -> e.B
+    com.ljx.example.activity.MainActivity -> dh.C
 ```
 
 `dir mapping`是混淆的目录列表，`class mapping`
@@ -118,13 +118,13 @@ class mapping:
 
 ```xml
 dir mapping:
-	com.ljx.example -> e
-	com.ljx.example.activity -> dh
+    com.ljx.example -> e
+    com.ljx.example.activity -> dh
     com.ljx.example.test -> h
 
 class mapping:
-	com.ljx.example.AppHolder -> e.B
-	com.ljx.example.activity.MainActivity -> dh.C
+    com.ljx.example.AppHolder -> e.B
+    com.ljx.example.activity.MainActivity -> dh.C
     com.ljx.example.test.Test -> h.D
 ```
 
