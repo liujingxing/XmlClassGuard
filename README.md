@@ -23,7 +23,7 @@
 
 1、在`build.gradle(root project)`中配置
 
-```xml
+```gradle
 buildscript {
     repositories {
         maven { url 'https://jitpack.io' }
@@ -35,7 +35,7 @@ buildscript {
 ```
 2、在 `build.gradle(application)` 中配置
 
-```xml
+```gradle
 apply plugin: "xml-class-guard"
 
 //以下均为非必须
@@ -48,6 +48,12 @@ xmlClassGuard {
     moveDir = ["com.ljx.example": "ef.gh"]
 }
 ```
+此时就可以在`Gradle`栏中，找到以下3个任务
+
+![guard.jpg](https://github.com/liujingxing/xml-class-guard-plugin/blob/master/image/guard.jpg)
+
+
+
 
 
 
