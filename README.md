@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/liujingxing/XmlClassGuard.svg)](https://jitpack.io/#liujingxing/XmlClassGuard)
+
 # XmlClassGuard 简介
 
 `XmlClassGuard`是一个可混淆任意类的Gradle插件，Android 4大组件、自定义View、任意类，只要你想，都可以将其混淆
@@ -48,7 +50,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.liujingxing:xml-class-guard-plugin:1.0.0"
+        classpath "com.github.liujingxing:XmlClassGuard:1.0.0-beta1"
     }
 }
 ```
