@@ -1,0 +1,12 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            from components.java
+            groupId 'com.github.liujingxing'
+            artifactId 'xml-class-guard-plugin'
+            version "$plugin_version"
+        }
+    }
+}

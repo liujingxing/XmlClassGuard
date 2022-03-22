@@ -1,0 +1,12 @@
+plugins {
+    id 'kotlin'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+apply from: 'maven.gradle'
+
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+}

@@ -1,0 +1,5 @@
+dir mapping:
+	com.ljx.xmlclassguard -> gj
+
+class mapping:
+	com.ljx.xmlclassguard.MainActivity -> gj.A

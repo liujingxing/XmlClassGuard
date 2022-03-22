@@ -1,0 +1,8 @@
+apply plugin: "xml-class-guard"
+
+xmlClassGuard {
+    mappingFile = file("xml-class-mapping.txt")
+    packageChange = ["com.ljx.example": "ab.cd"]
+    moveDir = ["com.ljx.example": "ef.gh"]
+
+}
