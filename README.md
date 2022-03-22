@@ -96,7 +96,7 @@ xmlClassGuard {
 ## 2、packageChange
 
 `packageChange`是一个更改`manifest`文件里`package`属性的任务，也就是更改app包名的任务(不会更改applicationId)
-，改完后，会将更改结果，同步到其他文件中，配置如下：
+，改完后，会将更改结果，同步到其他文件中(不会更改项目结构)，配置如下：
 
 ```gradle
 xmlClassGuard {
