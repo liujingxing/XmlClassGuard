@@ -100,7 +100,7 @@ xmlClassGuard {
 
 上面配置的`mappingFile`可以是一个不存在的文件，混淆结束后，会将混淆映射写出到该文件中，如下：
 
-```txt
+```xml
 dir mapping:
 	com.ljx.example -> e
 	com.ljx.example.activity -> dh
@@ -114,9 +114,21 @@ class mapping:
 是具体类的混淆列表，以上内容，也可以手动写入，下次混淆时，便会根据此配置进行增量混淆，如果你需要混淆指定的类`com.ljx.example.test.Test`，便可以在`dir mapping`
 下写入
 `com.ljx.example.test -> h`,此时再次执行`xmlClassGuard`任务，便会将`com.ljx.example.test`目录下的所有类(不包含子目录下的类)
-移动到`h`文件夹中，并将所有类名混淆
+移动到`h`文件夹中，并将所有类名混淆，再次混淆的后mapping文件如下：
 
-**注：混淆后的目录仅支持小写字母，混淆后的类名，仅支持大写字母，位数不限**
+```xml
+dir mapping:
+	com.ljx.example -> e
+	com.ljx.example.activity -> dh
+    com.ljx.example.test -> h
+
+class mapping:
+	com.ljx.example.AppHolder -> e.B
+	com.ljx.example.activity.MainActivity -> dh.C
+    com.ljx.example.test.Test -> h.D
+```
+
+**注：手动输入时，需要注意，混淆后的目录仅支持小写字母，类名仅支持大写字母，位数不限**
 
 
 
