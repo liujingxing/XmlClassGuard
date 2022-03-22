@@ -73,6 +73,15 @@ open class MoveDirTask @Inject constructor(
             } else {
                 replaceText.replaceWords(oldPath, newPath)
             }
+            if (name.endsWith(".kt") || name.endsWith(".java")) {
+                /*
+                 移动目录时，manifest里的package属性不会更改
+                 上面代码会将将R、BuildConfig等类路径替换掉，所以这里需要还原回去
+                 */
+                replaceText = replaceText.replaceWords("$newPath.R", "$oldPath.R")
+                    .replaceWords("$newPath.BuildConfig", "$oldPath.BuildConfig")
+                    .replaceWords("$newPath.databinding", "$newPath.databinding")
+            }
         }
         writeText(replaceText)
     }
