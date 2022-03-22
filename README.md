@@ -21,6 +21,13 @@
 
 - 极大降低aab包查重率，避免上架`Google Play`因查重率过高，导致下架或封号问题
 
+# 为什么取名XmlClassGuard?
+
+`XmlClassGuard`虽然可以混淆任意类，但最主要的目的还是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AadResGuard](https://github.com/bytedance/AabResGuard)对应
+
+
+
+
 # 原理
 
 `XmlClassGuard`不同于`AndResGuard(apk资源混淆)、AadResGuard(aab资源混淆)`侵入打包流程的方案，`XmlClassGuard`
