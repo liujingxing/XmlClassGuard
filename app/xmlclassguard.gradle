@@ -1,8 +1,11 @@
 apply plugin: "xml-class-guard"
 
+//以下均为非必须，根据自己需要配置即可
 xmlClassGuard {
+    //混淆映射文件
     mappingFile = file("xml-class-mapping.txt")
+    //更改manifest里package属性
     packageChange = ["com.ljx.example": "ab.cd"]
+    //移动目录，支持同时移动多个目录
     moveDir = ["com.ljx.example": "ef.gh"]
-
 }
