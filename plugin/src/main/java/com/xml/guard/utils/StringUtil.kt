@@ -87,7 +87,8 @@ fun String.isWord(index: Int, oldValue: String): Boolean {
     }
     val endChar = oldValue[oldValue.lastIndex].code
     if (endChar in 65..90 || endChar == 95 || endChar in 97..122) {
-        val suffix = get(index + oldValue.length).code
+
+        val suffix = getOrNull(index + oldValue.length)?.code
         // $ 0-9 A-Z _ a-z
         if (suffix == 36 || suffix in 48..57 || suffix in 65..90 || suffix == 95 || suffix in 97..122) {
             return false
