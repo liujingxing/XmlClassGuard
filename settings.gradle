@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "xml-class-guard-plugin"
+rootProject.name = "XmlClassGuard"
 include ':app'
 include ':plugin'
