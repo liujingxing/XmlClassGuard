@@ -157,8 +157,10 @@ class mapping:
 以上3个任务所作出的更改，仅仅会同步到所有的`java文件`、`kt文件`、`AndroidManifest.xml文件`及`navigation`和`layout`文件夹下xml文件；除此之外，如果有其他文件有影响到，则需要手动去更改，如配置混淆的`proguard-rules.pro`文件，`moveDir`任务有可能会移动混淆配置里`keep`的目录，`xmlClassGuard`也有可能混淆`proguard-rules.pro`文件`keep`的类，这些都需要手动去更改
 
 
+## Donations
+如果它对你帮助很大，并且你很想支持库的后续开发和维护，那么你可以扫下方二维码随意打赏我，就当是请我喝杯咖啡或是啤酒，开源不易，感激不尽
 
-
+![rxhttp_donate.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/aafa7d05cfda4b2ea2a092bba8ebc1a0~tplv-k3u1fbpfcp-watermark.image)
 
  
 
