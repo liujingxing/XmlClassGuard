@@ -111,27 +111,27 @@ open class XmlClassGuardTask @Inject constructor(
     }
 
     private fun replaceText(
-        srcFile: File,
-        srcText: String,
-        srcPath: String,
-        newPath: String,
+        rawFile: File,
+        rawText: String,
+        rawPath: String,
+        obfuscatePath: String,
     ): String {
-        val srcIndex = srcPath.lastIndexOf(".")
-        val newIndex = newPath.lastIndexOf(".")
-        val srcPackage = srcPath.substring(0, srcIndex)
-        val newPackage = newPath.substring(0, newIndex)
+        val rawIndex = rawPath.lastIndexOf(".")
+        val rawPackage = rawPath.substring(0, rawIndex)
+        val rawName = rawPath.substring(rawIndex + 1)
 
-        val srcNameNoSuffix = srcPath.substring(srcIndex + 1)
-        val newNameNoSuffix = newPath.substring(newIndex + 1)
+        val obfuscateIndex = obfuscatePath.lastIndexOf(".")
+        val obfuscatePackage = obfuscatePath.substring(0, obfuscateIndex)
+        val obfuscateName = obfuscatePath.substring(obfuscateIndex + 1)
 
-        var replaceText = srcText
-        replaceText = if (srcFile.absolutePath.removeSuffix().endsWith(newPath.replace(".", "/"))) {
+        var replaceText = rawText
+        replaceText = if (rawFile.absolutePath.removeSuffix().endsWith(obfuscatePath.replace(".", "/"))) {
             //更改混淆文件的package路径
-            replaceText.replaceWords("package $srcPackage", "package $newPackage")
+            replaceText.replaceWords("package $rawPackage", "package $obfuscatePackage")
         } else {
-            replaceText.replaceWords(srcPath, newPath)  //替换{包名+类名}
+            replaceText.replaceWords(rawPath, obfuscatePath)  //替换{包名+类名}
         }
-        replaceText = replaceText.replaceWords(srcNameNoSuffix, newNameNoSuffix)
+        replaceText = replaceText.replaceWords(rawName, obfuscateName)
         return replaceText
     }
 }
