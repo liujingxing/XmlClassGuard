@@ -2,32 +2,26 @@
 
 # XmlClassGuard 简介
 
-`XmlClassGuard`是一个可混淆任意类的Gradle插件，Android 4大组件、自定义View、任意类，只要你想，都可以将其混淆
+- `XmlClassGuard`是一个可混淆Android 4大组件、自定义View等任意类的插件
 
-# 为什么要写这个插件？
+- `XmlClassGuard`可以看作是`ProGuard`的一个补充，跟`ProGuard`没有任何关系，也不会有任何冲突
 
-原生混淆中，Android 四大组件(Activity,Service等)、自定义View等只要在xml文件中用到的类，都不会被混淆，这样就会有以下2个缺点
+- 可快速更改`manifest`文件里的`package`属性，并同步到其他文件中
 
-- 通过反编译，可以轻松看到真实的类名及包名
+- 可快速移动n个目录到其他目录中，并同步到其他文件中
 
-- 有过上架`Google Play`
-  商店的同学应该知道，如果之前的包被下架或封号，想要同套代码再次上架，那99%概率是再次封号，很大一部分原因就是以上说到的类未被混淆，
-  被Google断定为包重复，从而导致再次封号
-  
-针对第二点，如果我们想要再次上架，就必须要更改四大组件、自定义View等的`包名+类名`，然而，如果手动去完成这项任务，估计会累死一个程序员，于是乎，就有`XmlClassGuard`，通过插件去完成手工的活，一个任务便可搞定
+- `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AadResGuard](https://github.com/bytedance/AabResGuard)对应
 
 
 # 有什么用？
+
+- 弥补`ProGuard`不混淆4大组件等类问题
 
 - 增加aab、apk反编译的难度
 
 - 极大降低aab包查重率，避免上架`Google Play`因查重率过高，导致下架或封号问题
 
-# 为什么取名XmlClassGuard?
-
-`XmlClassGuard`虽然可以混淆任意类，但最主要的目的还是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AadResGuard](https://github.com/bytedance/AabResGuard)对应
-
-
+关于第三点，有过上架`Google Play` 商店的同学应该知道，如果之前的包被下架或封号，想要同套代码再次上架，那99%概率是再次封号，很大一部分原因就是以上说到的类未被混淆，很容易被Google断定为包重复，从而导致再次封号，因此，如果想要再次上架，就必须要更改四大组件、自定义View等的`包名+类名`以降低查重率，然而，如果手动去完成这项任务，估计会累死一个程序员，于是乎，就有了`XmlClassGuard`，通过插件去完成手工的活，一个任务便可搞定
 
 
 # 原理
@@ -50,7 +44,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.liujingxing:XmlClassGuard:1.0.0-beta1"
+        classpath "com.github.liujingxing:XmlClassGuard:1.0.0-beta2"
     }
 }
 ```
@@ -154,8 +148,11 @@ class mapping:
 
 # 注意事项⚠️
 
-以上3个任务所作出的更改，仅仅会同步到所有的`java文件`、`kt文件`、`AndroidManifest.xml文件`及`navigation`和`layout`文件夹下xml文件；除此之外，如果有其他文件有影响到，则需要手动去更改，如配置混淆的`proguard-rules.pro`文件，`moveDir`任务有可能会移动混淆配置里`keep`的目录，`xmlClassGuard`也有可能混淆`proguard-rules.pro`文件`keep`的类，这些都需要手动去更改
+- 要混淆的类，要避免与其他类同名，否则类名替换时，会出现误杀情况
 
+- 类混淆后，类的包名(路径)也会被混淆，所以，如果你用到一些三方库，有配置包名的地方，记得手动更改
+
+- `XmlClassGuard`不会更改`proguard-rules.pro`文件的内容，所以，类混淆后，如果该文件内容有混淆前的类或目录，也记得手动更改
 
 ## Donations
 如果它对你帮助很大，并且你很想支持库的后续开发和维护，那么你可以扫下方二维码随意打赏我，就当是请我喝杯咖啡或是啤酒，开源不易，感激不尽
