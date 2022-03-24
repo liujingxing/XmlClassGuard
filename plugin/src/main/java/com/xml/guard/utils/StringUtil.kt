@@ -97,25 +97,26 @@ fun String.isWord(index: Int, oldValue: String): Boolean {
     return true
 }
 
-// Int 转 小写字母
-fun Int.toLetterStr(): String {
-    val size = 26
-    val modChar = (this % size + 97).toChar()
-    if (this < size) return modChar.toString()
-    val result = (this / size)
-    return "${result.toLetterStr()}$modChar"
-}
-
-// Int 转 大写字母
+// Int 转 大写字符串
 fun Int.toUpperLetterStr(): String {
-    val size = 26
-    val modChar = (this % size + 65).toChar()
-    if (this < size) return modChar.toString()
-    val result = (this / size)
-    return "${result.toUpperLetterStr()}$modChar"
+    return toLetterStr(true)
 }
 
-// 字母转Int
+// Int 转 大/小字符串
+fun Int.toLetterStr(upperCase: Boolean = false): String {
+    val size = 26
+    val offSize = if (upperCase) 65 else 97
+    val sb = StringBuilder()
+    var num = this
+    do {
+        val char = (num % size + offSize).toChar()
+        sb.append(char)
+        num /= size
+    } while (num > 0)
+    return sb.reverse().toString()
+}
+
+// 大写字符串转Int
 fun String.toInt(): Int {
     val length = length
     var num = 0
