@@ -1,7 +1,7 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
-import com.xml.guard.model.Mapping
+import com.xml.guard.model.MappingParser
 import com.xml.guard.utils.findClassByLayoutXml
 import com.xml.guard.utils.findClassByManifest
 import com.xml.guard.utils.findClassByNavigationXml
@@ -33,7 +33,7 @@ open class XmlClassGuardTask @Inject constructor(
     }
 
     private val mappingFile = guardExtension.mappingFile ?: project.file("xml-class-mapping.txt")
-    private val mapping = Mapping(mappingFile)
+    private val mapping = MappingParser.parse(mappingFile)
 
     @TaskAction
     fun execute() {
@@ -51,7 +51,7 @@ open class XmlClassGuardTask @Inject constructor(
             androidProjects.forEach { replaceJavaText(it, classMapping) }
         }
         //4、混淆映射写出到文件
-        mapping.writeMappingToFile()
+        mapping.writeMappingToFile(mappingFile)
     }
 
     //处理res目录

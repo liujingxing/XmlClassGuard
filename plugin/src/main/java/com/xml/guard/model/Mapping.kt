@@ -7,7 +7,6 @@ import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDir
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.removeSuffix
-import com.xml.guard.utils.toInt
 import com.xml.guard.utils.toLetterStr
 import com.xml.guard.utils.toUpperLetterStr
 import groovy.xml.XmlParser
@@ -24,44 +23,18 @@ import java.util.regex.Pattern
  * Date: 2022/3/16
  * Time: 22:02
  */
-class Mapping(private val mappingFile: File) {
+class Mapping {
 
     companion object {
-        private val MAPPING_PATTERN: Pattern = Pattern.compile("\\s+(.*)->(.*)")
-        private const val DIR_MAPPING = "dir mapping:"
-        private const val CLASS_MAPPING = "class mapping:"
+        internal const val DIR_MAPPING = "dir mapping:"
+        internal const val CLASS_MAPPING = "class mapping:"
     }
 
-
-    private val dirMapping = mutableMapOf<String, String>()
-    private val classMapping = mutableMapOf<String, String>()
+    internal val dirMapping = mutableMapOf<String, String>()
+    internal val classMapping = mutableMapOf<String, String>()
 
     //通过index记录类名，防止重复
-    private var classIndex = -1
-
-    init {
-        var isDir = true
-        if (mappingFile.exists())
-            mappingFile.forEachLine { line ->
-                if (line.isNotEmpty()) {
-                    val mat = MAPPING_PATTERN.matcher(line)
-                    if (mat.find()) {
-                        val rawName = mat.group(1).trim()
-                        val obfuscateName = mat.group(2).trim()
-                        if (isDir) {
-                            dirMapping[rawName] = obfuscateName
-                        } else {
-                            val num =
-                                obfuscateName.substring(obfuscateName.lastIndexOf(".") + 1).toInt()
-                            if (num > classIndex) classIndex = num
-                            classMapping[rawName] = obfuscateName
-                        }
-                    } else {
-                        isDir = line == DIR_MAPPING
-                    }
-                }
-            }
-    }
+    internal var classIndex = -1
 
     //遍历文件夹下的所有直接子类，混淆文件名及移动目录
     fun obfuscateAllClass(project: Project): Map<String, String> {
@@ -113,7 +86,7 @@ class Mapping(private val mappingFile: File) {
     }
 
 
-    fun writeMappingToFile() {
+    fun writeMappingToFile(mappingFile: File) {
         val writer: Writer = BufferedWriter(FileWriter(mappingFile, false))
 
         writer.write("$DIR_MAPPING\n")
