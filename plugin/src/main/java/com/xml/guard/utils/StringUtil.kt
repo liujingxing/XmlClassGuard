@@ -117,7 +117,7 @@ fun Int.toLetterStr(upperCase: Boolean = false): String {
 }
 
 // 大写字符串转Int
-fun String.toInt(): Int {
+fun String.to26Int(): Int {
     val length = length
     var num = 0
     for (i in 0 until length) {
