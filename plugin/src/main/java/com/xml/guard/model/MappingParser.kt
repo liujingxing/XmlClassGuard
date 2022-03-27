@@ -34,6 +34,9 @@ object MappingParser {
                     }
                     val obfuscateClassPath = obfuscateName.substring(0, index)
                     val obfuscateClassName = obfuscateName.substring(index + 1)
+                    if ("R" == obfuscateClassName) {
+                        throw IllegalArgumentException("`$obfuscateName` is illegal, R cannot be defined as a class name")
+                    }
                     if (!UPPERCASE_PATTERN.matcher(obfuscateClassName).find()) {
                         //混淆的类名必须要大写
                         throw IllegalArgumentException("`$obfuscateName` is illegal, Obfuscation class name must be capitalized")
