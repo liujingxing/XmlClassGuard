@@ -15,6 +15,7 @@ import org.gradle.api.Project
 class XmlClassGuardPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
+        println("XmlClassGuard version is $version")
         val guardExtension = project.extensions.create("xmlClassGuard", GuardExtension::class.java)
         project.tasks.create("xmlClassGuard", XmlClassGuardTask::class.java, guardExtension)
         project.tasks.create("packageChange", PackageChangeTask::class.java, guardExtension)

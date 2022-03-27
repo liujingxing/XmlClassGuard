@@ -6,6 +6,22 @@ plugins {
 apply from: 'maven.gradle'
 
 
+sourceSets {
+    main.java.srcDirs += "$buildDir/generated/sources/java-templates/java/main"
+}
+
+compileKotlin {
+    dependsOn 'copyJavaTemplates'
+    kotlinOptions.freeCompilerArgs = ["-Xallow-result-return-type"]
+}
+
+task copyJavaTemplates(type: Copy) {
+    from 'src/main/java-templates'
+    into "$buildDir/generated/sources/java-templates/java/main"
+    expand('projectVersion': "$plugin_version")
+    filteringCharset = 'UTF-8'
+}
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
