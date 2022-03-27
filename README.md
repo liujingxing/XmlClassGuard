@@ -1,5 +1,7 @@
 [![](https://jitpack.io/v/liujingxing/XmlClassGuard.svg)](https://jitpack.io/#liujingxing/XmlClassGuard)
 
+***加我微信 ljx-studio 拉你进微信群***
+
 # XmlClassGuard 简介
 
 - `XmlClassGuard`是一个可混淆Android 4大组件、自定义View等任意类的插件
@@ -66,7 +68,7 @@ xmlClassGuard {
 
 此时就可以在`Gradle`栏中，找到以下3个任务
 
-![guard.jpg](https://github.com/liujingxing/xml-class-guard-plugin/blob/master/image/guard.jpg)
+![guard.jpg](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0899d1215d6e4a02b8e857f784ada441~tplv-k3u1fbpfcp-watermark.image?)
 
 # 任务介绍
 
@@ -145,8 +147,10 @@ class mapping:
     com.ljx.example.test.Test -> h.D
 ```
 
-手动输入混淆规则，需要注意一下几条规则
-![guard.jpg](https://github.com/liujingxing/xml-class-guard-plugin/blob/master/image/mapping_rule.jpg)
+手动输入混淆规则，需要注意以下几条规则
+
+![mapping_rule.jpg](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/32f446561004426193dae50537488180~tplv-k3u1fbpfcp-watermark.image?)
+
 
 ## 5、每次混淆产生不一样的结果
 
