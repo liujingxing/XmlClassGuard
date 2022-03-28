@@ -13,7 +13,7 @@
 
 - 可快速移动n个目录到其他目录中，并同步到其他文件中
 
-- `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AadResGuard](https://github.com/bytedance/AabResGuard)对应
+- `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AabResGuard](https://github.com/bytedance/AabResGuard)对应
 
 
 # 有什么用？
