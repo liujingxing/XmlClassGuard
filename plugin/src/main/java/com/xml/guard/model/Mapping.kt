@@ -15,7 +15,6 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.Writer
-import java.util.regex.Pattern
 
 
 /**
@@ -51,7 +50,10 @@ class Mapping {
             }
             //去除目录的直接子文件
             val dirPath = rawDir.replace(".", "/")
-            val childFiles = locationProject.javaDir(dirPath).listFiles { f -> !f.isDirectory }
+            val childFiles = locationProject.javaDir(dirPath).listFiles { f ->
+                val filename = f.name
+                f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
+            }
             if (childFiles.isNullOrEmpty()) continue
             for (file in childFiles) {
                 val rawClassPath = "${rawDir}.${file.name.removeSuffix()}"
