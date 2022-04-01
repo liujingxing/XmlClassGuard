@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-apply from: 'xmlclassguard.gradle'
+//apply from: 'xmlclassguard.gradle'
 
 android {
     compileSdk 31
