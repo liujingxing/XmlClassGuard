@@ -90,7 +90,7 @@ open class XmlClassGuardTask @Inject constructor(
             if (mapping.isObfuscated(classPath)) continue
             val obfuscatePath = mapping.obfuscatePath(classPath)
             xmlText = xmlText.replaceWords(classPath, obfuscatePath)
-            if (packageName != null) {
+            if (packageName != null && classPath.startsWith(packageName)) {
                 xmlText = xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
             }
         }
