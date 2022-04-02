@@ -125,14 +125,26 @@ open class XmlClassGuardTask @Inject constructor(
         val obfuscateName = obfuscatePath.substring(obfuscateIndex + 1)
 
         var replaceText = rawText
-        replaceText = if (rawFile.absolutePath.removeSuffix().endsWith(obfuscatePath.replace(".", "/"))) {
-            //更改混淆文件的package路径
-            replaceText.replaceWords("package $rawPackage", "package $obfuscatePackage")
-        } else {
-            replaceText.replaceWords(rawPath, obfuscatePath)  //替换{包名+类名}
-                .replaceWords("$rawPackage.*", "$obfuscatePackage.*")
+        when {
+            rawFile.absolutePath.removeSuffix().endsWith(obfuscatePath.replace(".", "/")) -> {
+                //对于自己，替换package语句及类名即可
+                replaceText = replaceText
+                    .replaceWords("package $rawPackage", "package $obfuscatePackage")
+                    .replaceWords(rawName, obfuscateName)
+            }
+            rawFile.parent.endsWith(rawPackage.replace(".", "/")) -> {
+                //同一包下的类，替换类名即可
+                replaceText = replaceText.replaceWords(rawName, obfuscateName)
+            }
+            else -> {
+                replaceText = replaceText.replaceWords(rawPath, obfuscatePath)  //替换{包名+类名}
+                    .replaceWords("$rawPackage.*", "$obfuscatePackage.*")
+                if (replaceText != rawText) {
+                    //rawFile 文件内有引用 rawName 类，则需要替换类名
+                    replaceText = replaceText.replaceWords(rawName, obfuscateName)
+                }
+            }
         }
-        replaceText = replaceText.replaceWords(rawName, obfuscateName)
         return replaceText
     }
 }
