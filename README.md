@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/liujingxing/XmlClassGuard.svg)](https://jitpack.io/#liujingxing/XmlClassGuard)
 [![](https://img.shields.io/badge/change-更新日志-success.svg)](https://github.com/liujingxing/XmlClassGuard/wiki/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97)
 
-***加我微信 ljx-studio 拉你进微信群***
+***加我微信 ljx-studio 拉你进微信群(备注来意，否则不通过)***
 
 # XmlClassGuard 简介
 
@@ -13,7 +13,7 @@
 
 - 可快速移动n个目录到其他目录中，并同步到其他文件中
 
-- `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AadResGuard](https://github.com/bytedance/AabResGuard)对应
+- `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AabResGuard](https://github.com/bytedance/AabResGuard)对应
 
 
 # 有什么用？
