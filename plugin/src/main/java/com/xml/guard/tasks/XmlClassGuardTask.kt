@@ -133,13 +133,15 @@ open class XmlClassGuardTask @Inject constructor(
                     .replaceWords(rawName, obfuscateName)
             }
             rawFile.parent.endsWith(obfuscatePackage.replace(".", "/")) -> {
-                //同一包下的类，替换类名即可
-                replaceText = replaceText.replaceWords(rawName, obfuscateName)
+                //同一包下的类，原则上替换类名即可，但考虑到会依赖同包下类的内部类，所以也需要替换包名+类名
+                replaceText = replaceText.replaceWords(rawPath, obfuscatePath)  //替换{包名+类名}
+                    .replaceWords(rawName, obfuscateName)
             }
             else -> {
                 replaceText = replaceText.replaceWords(rawPath, obfuscatePath)  //替换{包名+类名}
                     .replaceWords("$rawPackage.*", "$obfuscatePackage.*")
-                if (replaceText != rawText) {
+                //替换成功或已替换
+                if (replaceText != rawText || replaceText.contains("$obfuscatePackage.*")) {
                     //rawFile 文件内有引用 rawName 类，则需要替换类名
                     replaceText = replaceText.replaceWords(rawName, obfuscateName)
                 }
