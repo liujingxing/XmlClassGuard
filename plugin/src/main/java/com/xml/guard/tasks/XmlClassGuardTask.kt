@@ -132,7 +132,7 @@ open class XmlClassGuardTask @Inject constructor(
                     .replaceWords("package $rawPackage", "package $obfuscatePackage")
                     .replaceWords(rawName, obfuscateName)
             }
-            rawFile.parent.endsWith(rawPackage.replace(".", "/")) -> {
+            rawFile.parent.endsWith(obfuscatePackage.replace(".", "/")) -> {
                 //同一包下的类，替换类名即可
                 replaceText = replaceText.replaceWords(rawName, obfuscateName)
             }
