@@ -69,15 +69,15 @@ fun Project.findLocationProject(dir: String): Project? {
     val dependencyProjects = mutableListOf<Project>()
     findDependencyAndroidProject(dependencyProjects)
     dependencyProjects.forEach {
-        val peoject = it.findLocationProject(dir)
-        if (peoject != null) return peoject
+        val project = it.findLocationProject(dir)
+        if (project != null) return project
     }
     return null
 }
 
 fun findClassByLayoutXml(text: String, classPaths: MutableList<String>) {
-    val childrens = XmlParser(false, false).parseText(text).breadthFirst()
-    for (children in childrens) {
+    val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
+    for (children in childrenList) {
         val childNode = children as? Node ?: continue
         val classPath = childNode.name().toString()
         if (classPath !in whiteList) {
