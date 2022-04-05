@@ -36,7 +36,7 @@ open class FindConstraintReferencedIdsTask : DefaultTask() {
         }
         val set = findReferencedIds(layoutDirs)
         (aabResGuard.whiteList as HashSet).addAll(set)
-        println("ids=$set")
+        println("ids size is ${set.size} \n$set")
     }
 
     private fun findReferencedIds(layoutDirs: List<File>): Set<String> {
