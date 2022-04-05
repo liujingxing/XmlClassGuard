@@ -1,0 +1,19 @@
+res dir mapping:
+    res/anim -> res/ab
+    res/layout -> res/ac
+    res/drawable-xxhdpi-v4 -> res/ad
+	res/drawable-v23 -> res/l
+	res/layout-v26 -> res/y
+	res/drawable-v21 -> res/i
+	res/drawable-ldrtl-xhdpi-v17 -> res/p
+	res/drawable-xhdpi-v4 -> res/g
+	res/color-v21 -> res/c
+	res/color-v23 -> res/d
+
+res id mapping:
+
+
+res entries path mapping:
+
+
+

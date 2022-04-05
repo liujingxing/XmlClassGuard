@@ -25,4 +25,6 @@ task copyJavaTemplates(type: Copy) {
 dependencies {
     implementation gradleApi()
     api 'org.codehaus.groovy:groovy-xml:3.0.8'
+    implementation 'com.android.tools.build:gradle:7.1.2'
+    implementation "com.bytedance.android:aabresguard-plugin:0.1.10"
 }

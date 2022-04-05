@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
+apply from: 'aabresguard.gradle'
 
 //apply from: 'xmlclassguard.gradle'
 

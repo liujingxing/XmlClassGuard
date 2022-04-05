@@ -1,0 +1,19 @@
+apply plugin: "com.bytedance.android.aabResGuard"
+
+aabResGuard {
+    mappingFile = file("mapping.txt").toPath() // 用于增量混淆的 mapping 文件
+    // 白名单规则
+    whiteList = [
+            "*.R.raw.*"
+    ]
+    obfuscatedBundleFileName = "duplicated-app.aab" // 混淆后的文件名称，必须以 `.aab` 结尾
+//    mergeDuplicatedRes = false // 是否允许去除重复资源
+//    enableFilterFiles = false // 是否允许过滤文件
+//    // 文件过滤规则
+//    filterList = [
+//            "META-INF/*"
+//    ]
+//    enableFilterStrings = true // 过滤文案
+//    unusedStringPath = file("unused.txt").toPath() // 过滤文案列表路径 默认在mapping同目录查找
+//    languageWhiteList = ["en", "zh"] // 保留en,en-xx,zh,zh-xx等语言，其余均删除
+}

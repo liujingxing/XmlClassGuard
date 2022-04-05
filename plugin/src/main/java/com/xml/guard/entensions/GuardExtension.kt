@@ -9,6 +9,12 @@ import java.io.File
  */
 open class GuardExtension {
 
+    /*
+     * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
+     * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
+     */
+    var findConstraintReferencedIds = false
+
     var mappingFile: File? = null
 
     var packageChange = HashMap<String, String>()
