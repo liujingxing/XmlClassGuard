@@ -13,6 +13,8 @@
 
 - 可快速移动n个目录到其他目录中，并同步到其他文件中
 
+- 可查找`constraint_referenced_ids`属性的值，并自动添加到`AabResGuard`的白名单中
+
 - `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AabResGuard](https://github.com/bytedance/AabResGuard)对应
 
 
@@ -67,15 +69,35 @@ xmlClassGuard {
 }
 ```
 
-此时就可以在`Gradle`栏中，找到以下3个任务
+此时就可以在`Gradle`栏中，找到以下4个任务
 
-![guard.jpg](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0899d1215d6e4a02b8e857f784ada441~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7e98f0285572474182947cdfdc7c064d~tplv-k3u1fbpfcp-watermark.image?)
 
 # 任务介绍
 
-`XmlClassGuard`插件共有3个任务，分别是`moveDir`、`packageChange`及`xmlClassGuard`，下面将一一介绍
+`XmlClassGuard`插件共有4个任务，分别是`findConstraintReferencedIds`、`moveDir`、`packageChange`及`xmlClassGuard`，这4个任务之间没有任何关系，下面将一一介绍
 
-## 1、moveDir
+## 1、findConstraintReferencedIds
+
+该任务需要配合[AabResGuard](https://github.com/bytedance/AabResGuard)插件使用，如果你未使用AabResGuard插件，可忽略。
+
+这里简单介绍下，由于约束布局`constraint_referenced_ids`属性的值，内部是通过getIdentifier方法获取具体的id，这就要求我们把`constraint_referenced_ids`属性的值添加进`AabResGurad`的白名单中，否则打包时，id会被混淆，打包后，`constraint_referenced_ids`属性会失效，UI将出现异常。
+
+然而，项目中可能很多地方都用到`constraint_referenced_ids`属性，并且值非常多，要一个个找出来并手动添加到`AabResGuard`的白名单中，无疑是一项繁琐的工作，于是乎，`findConstraintReferencedIds`任务就派上用场了，它是在打包时，自动查找`constraint_referenced_ids`属性并添加进`AabResGuard`的白名单中，非常实用的功能，你仅需要在`XmlClassGurad`的配置`findConstraintReferencedIds`为true即可，如下：
+
+```gradle
+//以下均为非必须
+xmlClassGuard {
+    /*
+     * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
+     * true的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
+     */
+    findConstraintReferencedIds = true
+}
+```
+`findConstraintReferencedIds`任务不需要手动执行，打包(aab)时会自动执行
+
+## 2、moveDir
 
 `moveDir`是一个移动目录的任务，它支持同时移动任意个目录，它会将原目录下的所有文件(包括子目录)移动到另外一个文件夹下，并将移动的结果，同步到其他文件中，配置如下：
 
@@ -90,7 +112,7 @@ xmlClassGuard {
 上面代码中`moveDir`是一个Map对象，其中key代表要移动的目录，value代表目标目录； 上面任务会把`com.ljx.example`目录下的所有文件，移动到`ef.gh`
 目录下，将`com.ljx.example.test`目录下的所有文件移动到`ff.gg`目录下
 
-## 2、packageChange
+## 3、packageChange
 
 `packageChange`是一个更改`manifest`文件里`package`属性的任务，也就是更改app包名的任务(不会更改applicationId)
 ，改完后，会将更改结果，同步到其他文件中(不会更改项目结构)，配置如下：
@@ -104,7 +126,7 @@ xmlClassGuard {
 
 以上`packageChange`是一个Map对象，key为原始package属性，value为要更改的package属性，原始package属性不匹配，将更改失败
 
-## 3、xmlClassGuard
+## 4、xmlClassGuard
 
 `xmlClassGuard`是一个混淆类的任务，该任务会检索`AndroidManifest.xml`及`navigation、layout`
 文件夹下的xml文件，找出xml文件中引用到的类，如4大组件及自定义View等，更改其`包名+类名`，并将更改的结果，同步到其他文件中，最后会将混淆映射写出到mapping文件中，配置如下：
@@ -199,6 +221,8 @@ class mapping:
 - 类混淆后，类的包名(路径)也会被混淆，所以，如果你用到一些三方库，有配置包名的地方，记得手动更改
 
 - `XmlClassGuard`不会更改`proguard-rules.pro`文件的内容，所以，类混淆后，如果该文件内容有混淆前的类或目录，也记得手动更改
+
+- `XmlClassGuard`只会帮你更改`包名+类名`，并同步带其他文件中，不会更改你的任何代码逻辑，如混淆后，出现部分功能不正常问题，需要你自己查找原因，如果是`XmlClassGuard`的问题，欢迎提[issue](https://github.com/liujingxing/XmlClassGuard/issues)或[PR](https://github.com/liujingxing/XmlClassGuard/pulls)
 
 ## Donations
 如果它对你帮助很大，并且你很想支持库的后续开发和维护，那么你可以扫下方二维码随意打赏我，就当是请我喝杯咖啡或是啤酒，开源不易，感激不尽
