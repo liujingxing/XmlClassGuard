@@ -49,7 +49,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.liujingxing:XmlClassGuard:1.0.0"
+        classpath "com.github.liujingxing:XmlClassGuard:1.0.1"
     }
 }
 ```
@@ -60,6 +60,11 @@ apply plugin: "xml-class-guard"
 
 //以下均为非必须
 xmlClassGuard {
+    /*
+     * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
+     * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
+     */
+    findConstraintReferencedIds = true
     //用于增量混淆的 mapping 文件
     mappingFile = file("xml-class-mapping.txt")
     //更改manifest文件的package属性，即包名
