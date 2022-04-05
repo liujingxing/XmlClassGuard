@@ -58,7 +58,12 @@ open class FindConstraintReferencedIdsTask : DefaultTask() {
             val childNode = children as? Node ?: continue
             val ids = childNode.attribute("app:constraint_referenced_ids")?.toString()
             if (ids.isNullOrBlank()) continue
-            ids.split(",").forEach { set.add("*.R.id.$it") }
+            ids.split(",").forEach {
+                val id = it.trim()
+                if (id.isNotEmpty()) {
+                    set.add("*.R.id.${id}")
+                }
+            }
         }
         return set
     }
