@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/liujingxing/XmlClassGuard.svg)](https://jitpack.io/#liujingxing/XmlClassGuard)
 [![](https://img.shields.io/badge/change-更新日志-success.svg)](https://github.com/liujingxing/XmlClassGuard/wiki/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97)
 
-***加我微信 ljx-studio 拉你进微信群(备注来意，否则不通过)***
+***加我微信 ljx-studio 拉你进微信群(备注XmlClassGuard)***
 
 # XmlClassGuard 简介
 
