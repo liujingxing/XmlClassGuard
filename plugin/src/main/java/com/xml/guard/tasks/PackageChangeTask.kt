@@ -51,7 +51,7 @@ open class PackageChangeTask @Inject constructor(
         }
 
         //3.对旧包名下的直接子类，检测R类、BuildConfig类是否有用到，有的话，插入import语句
-        project.javaDir(oldPackage.replace(".", "/"))
+        project.javaDir(oldPackage.replace(".", File.separator))
             .listFiles { f -> !f.isDirectory }
             ?.forEach { file ->
                 file.insertImportXxxIfAbsent(newPackage)

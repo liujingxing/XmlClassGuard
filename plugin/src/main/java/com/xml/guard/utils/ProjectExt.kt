@@ -61,7 +61,7 @@ fun Project.isAndroidProject() =
 
 //查找dir所在的Project，dir不存在，返回null
 fun Project.findLocationProject(dir: String): Project? {
-    val packageName = dir.replace(".", "/")
+    val packageName = dir.replace(".", File.separator)
     val absoluteDir = javaDir(packageName)
     if (absoluteDir.exists()) {
         return this

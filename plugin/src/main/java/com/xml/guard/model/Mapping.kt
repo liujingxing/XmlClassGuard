@@ -49,7 +49,7 @@ class Mapping {
                 continue
             }
             //去除目录的直接子文件
-            val dirPath = rawDir.replace(".", "/")
+            val dirPath = rawDir.replace(".", File.separator)
             val childFiles = locationProject.javaDir(dirPath).listFiles { f ->
                 val filename = f.name
                 f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
@@ -63,7 +63,7 @@ class Mapping {
                     file.insertImportXxxIfAbsent(manifestPackage)
                 }
                 val obfuscatePath = obfuscatePath(rawClassPath)
-                val relativePath = obfuscatePath.replace(".", "/") + file.name.getSuffix()
+                val relativePath = obfuscatePath.replace(".", File.separator) + file.name.getSuffix()
                 val newFile = locationProject.javaDir(relativePath)
                 if (!newFile.exists()) newFile.parentFile.mkdirs()
                 newFile.writeText(file.readText())

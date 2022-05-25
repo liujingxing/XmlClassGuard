@@ -44,7 +44,7 @@ open class MoveDirTask @Inject constructor(
 
         // 2、开始移动目录
         moveFile.forEach { (oldPath, newPath) ->
-            val oldDir = project.javaDir(oldPath.replace(".", "/"))
+            val oldDir = project.javaDir(oldPath.replace(".", File.separator))
             if (oldPath == manifestPackage) {
                 //包名目录下的直接子类移动位置，需要重新手动导入R类及BuildConfig类(如果有用到的话)
                 oldDir.listFiles { f -> !f.isDirectory }?.forEach { file ->
@@ -53,7 +53,7 @@ open class MoveDirTask @Inject constructor(
             }
             project.copy {
                 it.from(oldDir)
-                it.into(project.javaDir(newPath.replace(".", "/")))
+                it.into(project.javaDir(newPath.replace(".", File.separator)))
             }
             project.delete(oldDir)
         }
