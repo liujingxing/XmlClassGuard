@@ -76,6 +76,7 @@ class Mapping {
 
     fun isObfuscated(rawClassPath: String) = classMapping.containsValue(rawClassPath)
 
+    //混淆包名+类名，返回混淆后的包名+类名
     fun obfuscatePath(rawClassPath: String): String {
         var obfuscateClassPath = classMapping[rawClassPath]
         if (obfuscateClassPath == null) {
@@ -107,6 +108,7 @@ class Mapping {
         writer.close()
     }
 
+    //混淆包名，返回混淆后的包名
     private fun obfuscatePackage(rawPackage: String): String {
         var obfuscatePackage = dirMapping[rawPackage]
         if (obfuscatePackage == null) {
