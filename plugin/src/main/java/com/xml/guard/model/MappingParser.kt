@@ -32,8 +32,8 @@ object MappingParser {
                         //混淆路径必须要有包名
                         throw IllegalArgumentException("`$obfuscateName` is illegal, must have a package name")
                     }
-                    val obfuscateClassPath = obfuscateName.substring(0, index)
-                    val obfuscateClassName = obfuscateName.substring(index + 1)
+                    val obfuscateClassPath = obfuscateName.substring(0, index) //混淆后的包名
+                    val obfuscateClassName = obfuscateName.substring(index + 1) //混淆后的类名
                     if ("R" == obfuscateClassName) {
                         throw IllegalArgumentException("`$obfuscateName` is illegal, R cannot be defined as a class name")
                     }
@@ -43,7 +43,7 @@ object MappingParser {
                     }
                     val dirMapping = mapping.dirMapping
                     if (!dirMapping.containsValue(obfuscateClassPath)) {
-                        val rawClassPath = rawName.substring(0, rawName.lastIndexOf("."))
+                        val rawClassPath = rawName.substring(0, rawName.lastIndexOf(".")) //原始包名
                         if (dirMapping.containsKey(rawClassPath)) {
                             //类混淆的真实路径与混淆的目录不匹配
                             throw IllegalArgumentException("$rawName -> $obfuscateName is illegal should be\n$rawName -> ${dirMapping[rawClassPath]}.$obfuscateClassName")
@@ -51,7 +51,7 @@ object MappingParser {
                         dirMapping[rawClassPath] = obfuscateClassPath
                     }
                     val num = obfuscateClassName.to26Int()
-                    if (num > classIndex) classIndex = num
+                    classIndex = classIndex.coerceAtLeast(num)
                     mapping.classMapping[rawName] = obfuscateName
                 }
             } else {

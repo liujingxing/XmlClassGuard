@@ -1,5 +1,6 @@
 package com.xml.guard.utils
 
+import java.util.regex.Pattern
 import kotlin.math.pow
 
 /**
@@ -117,13 +118,21 @@ fun Int.toLetterStr(upperCase: Boolean = false): String {
     return sb.reverse().toString()
 }
 
-// 大写字符串转Int
+//字符串转Int, 必须是大写或小写字母, 不能是大小写混合
 fun String.to26Int(): Int {
+    val regexLowercase = "^[a-z]+$"
+    val regexUppercase = "^[A-Z]+$"
+    val isLowercase = Pattern.matches(regexLowercase, this)
+    val isUppercase = if (isLowercase) false else Pattern.matches(regexUppercase, this)
+    if (!isLowercase && !isUppercase) {
+        throw IllegalArgumentException("string must be uppercase or lowercase but it was $this")
+    }
+    val offSize = if (isUppercase) 65 else 97
     val length = length
     var num = 0
     for (i in 0 until length) {
         val c = get(i)
-        num += ((c.code - 65) * 26.0.pow((length - 1 - i).toDouble())).toInt()
+        num += ((c.code - offSize) * 26.0.pow((length - 1 - i).toDouble())).toInt()
     }
     return num
 }
