@@ -1,12 +1,14 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
+import com.xml.guard.utils.findDependencyAndroidProject
 import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDir
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.replaceWords
 import groovy.xml.XmlParser
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import javax.inject.Inject
@@ -28,11 +30,16 @@ open class PackageChangeTask @Inject constructor(
     fun execute() {
         val packageExtension = guardExtension.packageChange
         if (packageExtension.isEmpty()) return
-        changePackage(packageExtension)
+        val dependencyProjects = mutableListOf<Project>()
+        project.findDependencyAndroidProject(dependencyProjects)
+        val androidProjects = mutableListOf<Project>()
+        androidProjects.add(project)
+        androidProjects.addAll(dependencyProjects)
+        androidProjects.forEach { it.changePackage(packageExtension) }
     }
 
-    private fun changePackage(map: Map<String, String>) {
-        val manifestFile = project.manifestFile()
+    private fun Project.changePackage(map: Map<String, String>) {
+        val manifestFile = manifestFile()
         val oldPackage = manifestFile.findPackage() ?: return
         val newPackage = map[oldPackage] ?: return
         //1.修改manifest文件
@@ -42,7 +49,7 @@ open class PackageChangeTask @Inject constructor(
             .let { manifestFile.writeText(it) }
 
         //2.修改 kt/java文件
-        project.files("src/main/java").asFileTree.forEach { javaFile ->
+        files("src/main/java").asFileTree.forEach { javaFile ->
             javaFile.readText()
                 .replaceWords("$oldPackage.R", "$newPackage.R")
                 .replaceWords("$oldPackage.BuildConfig", "$newPackage.BuildConfig")
@@ -51,7 +58,7 @@ open class PackageChangeTask @Inject constructor(
         }
 
         //3.对旧包名下的直接子类，检测R类、BuildConfig类是否有用到，有的话，插入import语句
-        project.javaDir(oldPackage.replace(".", File.separator))
+        javaDir(oldPackage.replace(".", File.separator))
             .listFiles { f -> !f.isDirectory }
             ?.forEach { file ->
                 file.insertImportXxxIfAbsent(newPackage)

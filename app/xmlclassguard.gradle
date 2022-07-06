@@ -10,8 +10,9 @@ xmlClassGuard {
     //混淆映射文件
     mappingFile = file("xml-class-mapping.txt")
     //更改manifest里package属性
-    packageChange = ["com.ljx.example": "ab.cd"]
+    packageChange = ["com.ljx.example": "ab.cd",
+                     "com.ljx.base"   : "ggg.kkk"]
     //移动目录，支持同时移动多个目录
     moveDir = ["com.ljx.example": "ef.gh",
-               "com.ljx.base": "zzzz.hhhh"]
+               "com.ljx.base"   : "zzzz.hhhh"]
 }
