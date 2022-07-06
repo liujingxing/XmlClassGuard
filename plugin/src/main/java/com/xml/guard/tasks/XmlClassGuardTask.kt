@@ -2,10 +2,10 @@ package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.model.MappingParser
+import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findClassByLayoutXml
 import com.xml.guard.utils.findClassByManifest
 import com.xml.guard.utils.findClassByNavigationXml
-import com.xml.guard.utils.findDependencyAndroidProject
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.getDirPath
 import com.xml.guard.utils.javaDir
@@ -37,11 +37,7 @@ open class XmlClassGuardTask @Inject constructor(
 
     @TaskAction
     fun execute() {
-        val dependencyProjects = mutableListOf<Project>()
-        project.findDependencyAndroidProject(dependencyProjects)
-        val androidProjects = mutableListOf<Project>()
-        androidProjects.add(project)
-        androidProjects.addAll(dependencyProjects)
+        val androidProjects = allDependencyAndroidProjects()
         //1、遍历res下的xml文件，找到自定义的类(View/Fragment/四大组件等)，并将混淆结果同步到xml文件内
         androidProjects.forEach { handleResDir(it) }
         //2、混淆文件名及文件路径，返回本次混淆的类

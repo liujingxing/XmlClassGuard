@@ -1,7 +1,7 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
-import com.xml.guard.utils.findDependencyAndroidProject
+import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDir
 import com.xml.guard.utils.manifestFile
@@ -31,11 +31,7 @@ open class MoveDirTask @Inject constructor(
     fun execute() {
         val moveFile = guardExtension.moveDir
         if (moveFile.isEmpty()) return
-        val dependencyProjects = mutableListOf<Project>()
-        project.findDependencyAndroidProject(dependencyProjects)
-        val androidProjects = mutableListOf<Project>()
-        androidProjects.add(project)
-        androidProjects.addAll(dependencyProjects)
+        val androidProjects = allDependencyAndroidProjects()
         androidProjects.forEach { it.moveDir(moveFile) }
     }
 
