@@ -29,11 +29,26 @@ class Mapping {
         internal const val CLASS_MAPPING = "class mapping:"
     }
 
+    private val packageNameBlackList = mutableSetOf(
+        "in", "is", "as", "if", "do", "by", "new", "try", "int", "for", "out", "var", "val", "fun",
+        "byte", "void", "this", "else", "case", "open", "enum", "true", "false", "inner", "unit",
+        "null", "char", "long", "super", "while", "break", "float", "final", "short", "const",
+        "throw", "class", "catch", "return", "static", "import", "assert", "inline", "reified",
+        "object", "sealed", "vararg", "suspend",
+        "double", "native", "extends", "switch", "public", "package", "throws", "continue",
+        "noinline", "lateinit", "internal", "companion",
+        "default", "finally", "abstract", "private", "protected", "implements", "interface",
+        "strictfp", "transient", "boolean", "volatile", "instanceof", "synchronized", "constructor"
+    )
+
     internal val dirMapping = mutableMapOf<String, String>()
     internal val classMapping = mutableMapOf<String, String>()
 
-    //通过index记录类名，防止重复
-    internal var classIndex = -1
+    //类名索引
+    internal var classIndex = -1L
+
+    //包名索引
+    internal var packageNameIndex = -1L
 
     //遍历文件夹下的所有直接子类，混淆文件名及移动目录
     fun obfuscateAllClass(project: Project): Map<String, String> {
@@ -112,16 +127,25 @@ class Mapping {
     private fun obfuscatePackage(rawPackage: String): String {
         var obfuscatePackage = dirMapping[rawPackage]
         if (obfuscatePackage == null) {
-            val packageHash = hash(rawPackage)
-            val index = packageHash and 0xff
-            obfuscatePackage = index.toLetterStr()
+            obfuscatePackage = generateObfuscatePackageName()
             dirMapping[rawPackage] = obfuscatePackage
         }
         return obfuscatePackage
     }
 
+    //生成混淆的包名
+    private fun generateObfuscatePackageName(): String {
+        var obfuscatePackage = (++packageNameIndex).toLetterStr()
+        while (obfuscatePackage in packageNameBlackList) {
+            //过滤黑名单
+            obfuscatePackage = (++packageNameIndex).toLetterStr()
+        }
+        return obfuscatePackage
+    }
+
+    //生成混淆的类名
     private fun generateObfuscateClassName(): String {
-        if (++classIndex == 17) { //跳过字母 R
+        if (++classIndex == 17L) { //跳过字母 R
             classIndex++
         }
         return classIndex.toUpperLetterStr()

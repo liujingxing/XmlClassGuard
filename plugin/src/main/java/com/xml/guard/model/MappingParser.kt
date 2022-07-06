@@ -1,6 +1,6 @@
 package com.xml.guard.model
 
-import com.xml.guard.utils.to26Int
+import com.xml.guard.utils.to26Long
 import java.io.File
 import java.util.regex.Pattern
 
@@ -13,12 +13,14 @@ object MappingParser {
 
     private val MAPPING_PATTERN: Pattern = Pattern.compile("\\s+(.*)->(.*)")
     private val UPPERCASE_PATTERN: Pattern = Pattern.compile("^[A-Z]+$")
+    private val LOWER_PATTERN: Pattern = Pattern.compile("^[a-z]+$")
 
     fun parse(mappingFile: File): Mapping {
         val mapping = Mapping()
         var isDir = true
         if (!mappingFile.exists()) return mapping
-        var classIndex = -1
+        var classIndex = -1L
+        var packageNameIndex = -1L
         mappingFile.forEachLine { line ->
             val mat = MAPPING_PATTERN.matcher(line)
             if (mat.find()) {
@@ -26,6 +28,10 @@ object MappingParser {
                 val obfuscateName = mat.group(2).trim()
                 if (isDir) {
                     mapping.dirMapping[rawName] = obfuscateName
+                    if (LOWER_PATTERN.matcher(obfuscateName).matches()) {
+                        val index = obfuscateName.to26Long()
+                        packageNameIndex = packageNameIndex.coerceAtLeast(index)
+                    }
                 } else {
                     val index = obfuscateName.lastIndexOf(".")
                     if (index == -1) {
@@ -50,7 +56,7 @@ object MappingParser {
                         }
                         dirMapping[rawClassPath] = obfuscateClassPath
                     }
-                    val num = obfuscateClassName.to26Int()
+                    val num = obfuscateClassName.to26Long()
                     classIndex = classIndex.coerceAtLeast(num)
                     mapping.classMapping[rawName] = obfuscateName
                 }
@@ -59,6 +65,7 @@ object MappingParser {
             }
         }
         mapping.classIndex = classIndex
+        mapping.packageNameIndex = packageNameIndex
         return mapping
     }
 }

@@ -100,12 +100,12 @@ fun String.isWord(index: Int, oldValue: String): Boolean {
 }
 
 // Int 转 大写字符串
-fun Int.toUpperLetterStr(): String {
+fun Long.toUpperLetterStr(): String {
     return toLetterStr(true)
 }
 
 // Int 转 大/小字符串
-fun Int.toLetterStr(upperCase: Boolean = false): String {
+fun Long.toLetterStr(upperCase: Boolean = false): String {
     val size = 26
     val offSize = if (upperCase) 65 else 97
     val sb = StringBuilder()
@@ -119,7 +119,7 @@ fun Int.toLetterStr(upperCase: Boolean = false): String {
 }
 
 //字符串转Int, 必须是大写或小写字母, 不能是大小写混合
-fun String.to26Int(): Int {
+fun String.to26Long(): Long {
     val regexLowercase = "^[a-z]+$"
     val regexUppercase = "^[A-Z]+$"
     val isLowercase = Pattern.matches(regexLowercase, this)
@@ -129,10 +129,10 @@ fun String.to26Int(): Int {
     }
     val offSize = if (isUppercase) 65 else 97
     val length = length
-    var num = 0
+    var num = 0L
     for (i in 0 until length) {
         val c = get(i)
-        num += ((c.code - offSize) * 26.0.pow((length - 1 - i).toDouble())).toInt()
+        num += ((c.code - offSize) * 26.0.pow((length - 1 - i).toDouble())).toLong()
     }
     return num
 }
