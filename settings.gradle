@@ -3,10 +3,15 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
+        if ("true" == useMavenLocal) {
+            mavenLocal()
+        }
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
     }
 }
 dependencyResolutionManagement {
-//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
