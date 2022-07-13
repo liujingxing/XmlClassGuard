@@ -86,7 +86,7 @@ open class MoveDirTask @Inject constructor(
                  */
                 replaceText = replaceText.replaceWords("$newPath.R", "$oldPath.R")
                     .replaceWords("$newPath.BuildConfig", "$oldPath.BuildConfig")
-                    .replaceWords("$newPath.databinding", "$newPath.databinding")
+                    .replaceWords("$newPath.databinding", "$oldPath.databinding")
             }
         }
         writeText(replaceText)
