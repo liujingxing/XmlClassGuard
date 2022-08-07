@@ -157,7 +157,7 @@ class mapping:
 
 `dir mapping`是混淆的目录列表，`class mapping`是具体类的混淆列表
 
-## 4、混淆任意类
+## 5、混淆任意类
 
 `xmlClassGuard`任务是支持增量混淆的，如果你需要混淆指定的类`com.ljx.example.test.Test`，便可以在`dir mapping`下写入`com.ljx.example.test -> h`,
 此时再次执行`xmlClassGuard`任务，便会将`com.ljx.example.test`目录下的所有类(不包含子目录下的类)
@@ -180,7 +180,7 @@ class mapping:
 ![mapping_rule.jpg](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/32f446561004426193dae50537488180~tplv-k3u1fbpfcp-watermark.image?)
 
 
-## 5、每次混淆产生不一样的结果
+## 6、每次混淆产生不一样的结果
 
 默认情况下，每次混淆，都将产生一样的结果，混淆的包名根据哈希算法得出，混淆的类名，从大写字母A开启，依次递增，如：`A B C ... Y Z BA BB .. ZY ZZ BAA...`
 
