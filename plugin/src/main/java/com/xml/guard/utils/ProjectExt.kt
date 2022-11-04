@@ -103,9 +103,9 @@ fun findClassByNavigationXml(text: String, classPaths: MutableList<String>) {
 }
 
 //在manifest文件里，查找四大组件及Application，返回文件的package属性，即包名
-fun findClassByManifest(text: String, classPaths: MutableList<String>): String {
+fun findClassByManifest(text: String, classPaths: MutableList<String>, namespace: String?): String {
     val rootNode = XmlParser(false, false).parseText(text)
-    val packageName = rootNode.attribute("package").toString()
+    val packageName = namespace ?: rootNode.attribute("package").toString()
     val nodeList = rootNode.get("application") as? NodeList ?: return packageName
     val applicationNode = nodeList.firstOrNull() as? Node ?: return packageName
     val application = applicationNode.attribute("android:name")?.toString()

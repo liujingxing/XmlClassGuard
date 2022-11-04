@@ -1,5 +1,6 @@
 package com.xml.guard.tasks
 
+import com.android.build.gradle.BaseExtension
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.insertImportXxxIfAbsent
@@ -35,15 +36,10 @@ open class PackageChangeTask @Inject constructor(
     }
 
     private fun Project.changePackage(map: Map<String, String>) {
-        val manifestFile = manifestFile()
-        val oldPackage = manifestFile.findPackage() ?: return
-        val newPackage = map[oldPackage] ?: return
-        //1.修改manifest文件
-        manifestFile.readText()
-            .replaceWords("""package="$oldPackage"""", """package="$newPackage"""")
-            .replaceWords("""android:name=".""", """android:name="$oldPackage.""")
-            .let { manifestFile.writeText(it) }
-
+        //1.修改manifest文件 或 build.gradle namespace
+        val pair = getNewPackageAndModifyOldPackage(map) ?: return
+        val oldPackage = pair.first
+        val newPackage = pair.second
         //2.修改 kt/java文件
         files("src/main/java").asFileTree.forEach { javaFile ->
             javaFile.readText()
@@ -59,6 +55,27 @@ open class PackageChangeTask @Inject constructor(
             ?.forEach { file ->
                 file.insertImportXxxIfAbsent(newPackage)
             }
+    }
+
+    private fun Project.getNewPackageAndModifyOldPackage(map: Map<String, String>): Pair<String, String>? {
+        // 配置了 namespace
+        val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
+        if (namespace == null) {
+            val manifestFile = manifestFile()
+            val oldPackage = manifestFile.findPackage() ?: return null
+            val newPackage = map[oldPackage] ?: return null
+            manifestFile.readText()
+                .replaceWords("""package="$oldPackage"""", """package="$newPackage"""")
+                .replaceWords("""android:name=".""", """android:name="$oldPackage.""")
+                .let { manifestFile.writeText(it) }
+            return Pair(oldPackage, newPackage)
+        } else {
+            val newPackage = map[namespace] ?: return null
+            buildFile.readText()
+                .replace("namespace\\s+['\"]${namespace}['\"]".toRegex(), "namespace '$newPackage'")
+                .let { buildFile.writeText(it) }
+            return Pair(namespace, newPackage)
+        }
     }
 
     private fun File.findPackage(): String? {
