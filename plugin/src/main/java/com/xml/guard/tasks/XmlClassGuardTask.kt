@@ -1,5 +1,6 @@
 package com.xml.guard.tasks
 
+import com.android.build.gradle.BaseExtension
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.model.MappingParser
 import com.xml.guard.utils.allDependencyAndroidProjects
@@ -75,7 +76,7 @@ open class XmlClassGuardTask @Inject constructor(
                 findClassByLayoutXml(xmlText, classPaths)
             }
             xmlFile.name == "AndroidManifest.xml" -> {
-                packageName = findClassByManifest(xmlText, classPaths)
+                packageName = findClassByManifest(xmlText, classPaths, (project.extensions.getByName("android") as BaseExtension).namespace)
             }
         }
         for (classPath in classPaths) {
