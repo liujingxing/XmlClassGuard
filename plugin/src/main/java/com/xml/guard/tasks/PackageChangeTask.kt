@@ -36,11 +36,13 @@ open class PackageChangeTask @Inject constructor(
     }
 
     private fun Project.changePackage(map: Map<String, String>) {
-        //1.修改manifest文件 或 build.gradle namespace
-        val pair = getNewPackageAndModifyOldPackage(map) ?: return
+        //1.修改 build.gradle namespace
+        val namespace = modifyBuildGradleFile(map)
+        //2.修改AndroidManifest.xml文件
+        val pair = modifyManifestFile(map, namespace) ?: return
         val oldPackage = pair.first
         val newPackage = pair.second
-        //2.修改 kt/java文件
+        //3.修改 kt/java文件
         files("src/main/java").asFileTree.forEach { javaFile ->
             javaFile.readText()
                 .replaceWords("$oldPackage.R", "$newPackage.R")
@@ -57,25 +59,30 @@ open class PackageChangeTask @Inject constructor(
             }
     }
 
-    private fun Project.getNewPackageAndModifyOldPackage(map: Map<String, String>): Pair<String, String>? {
-        // 配置了 namespace
-        val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
-        if (namespace == null) {
-            val manifestFile = manifestFile()
-            val oldPackage = manifestFile.findPackage() ?: return null
-            val newPackage = map[oldPackage] ?: return null
-            manifestFile.readText()
-                .replaceWords("""package="$oldPackage"""", """package="$newPackage"""")
-                .replaceWords("""android:name=".""", """android:name="$oldPackage.""")
-                .let { manifestFile.writeText(it) }
-            return Pair(oldPackage, newPackage)
-        } else {
-            val newPackage = map[namespace] ?: return null
-            buildFile.readText()
-                .replace("namespace\\s+['\"]${namespace}['\"]".toRegex(), "namespace '$newPackage'")
-                .let { buildFile.writeText(it) }
-            return Pair(namespace, newPackage)
-        }
+    //修复build.gradle文件的 namespace 语句，并返回namespace
+    private fun Project.modifyBuildGradleFile(map: Map<String, String>): String? {
+        val namespace =
+            (project.extensions.getByName("android") as BaseExtension).namespace ?: return null
+        val newPackage = map[namespace] ?: return null
+        buildFile.readText()
+            .replace("namespace\\s+['\"]${namespace}['\"]".toRegex(), "namespace '$newPackage'")
+            .let { buildFile.writeText(it) }
+        return namespace
+    }
+
+    //修改AndroidManifest.xml文件，并返回新旧包名
+    private fun Project.modifyManifestFile(
+        map: Map<String, String>,
+        namespace: String?
+    ): Pair<String, String>? {
+        val manifestFile = manifestFile()
+        val oldPackage = namespace ?: manifestFile.findPackage() ?: return null
+        val newPackage = map[oldPackage] ?: return null
+        manifestFile.readText()
+            .replaceWords("""package="$oldPackage"""", """package="$newPackage"""")
+            .replaceWords("""android:name=".""", """android:name="$oldPackage.""")
+            .let { manifestFile.writeText(it) }
+        return Pair(oldPackage, newPackage)
     }
 
     private fun File.findPackage(): String? {
