@@ -24,7 +24,7 @@ task copyJavaTemplates(type: Copy) {
 
 dependencies {
     compileOnly gradleApi()
-    api 'org.codehaus.groovy:groovy-xml:3.0.8'
-    compileOnly 'com.android.tools.build:gradle:7.1.2'
+    api 'org.codehaus.groovy:groovy-xml:3.0.9'
+    compileOnly 'com.android.tools.build:gradle:7.3.1'
     compileOnly "com.bytedance.android:aabresguard-plugin:0.1.10"
 }
