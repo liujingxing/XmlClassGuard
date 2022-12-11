@@ -45,7 +45,6 @@ class Mapping {
     fun obfuscateAllClass(project: Project): Map<String, String> {
         val classMapped = mutableMapOf<String, String>()
         val iterator = dirMapping.iterator()
-        val manifestPackage = project.findPackage()
         while (iterator.hasNext()) {
             val entry = iterator.next()
             val rawDir = entry.key
@@ -54,6 +53,7 @@ class Mapping {
                 iterator.remove()
                 continue
             }
+            val manifestPackage = locationProject.findPackage()
             //去除目录的直接子文件
             val dirPath = rawDir.replace(".", File.separator)
             val childFiles = locationProject.javaDirs(dirPath).flatMap {

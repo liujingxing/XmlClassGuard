@@ -30,7 +30,7 @@ fun File.insertImportXxxIfAbsent(newPackage: String) {
         if (packageIndex > 0) {
             builder.append(text.substring(0, packageIndex))
         }
-        builder.append(text.substring(packageIndex, packageStatement.length))
+        builder.append(text.substring(packageIndex, packageIndex + packageStatement.length))
         builder.append("\n\n")
         if (needImportR) {
             //import xx.xx.xx.R
