@@ -1,12 +1,7 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
-import com.xml.guard.utils.allDependencyAndroidProjects
-import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDir
-import com.xml.guard.utils.manifestFile
-import com.xml.guard.utils.replaceWords
-import com.xml.guard.utils.resDir
+import com.xml.guard.utils.*
 import groovy.xml.XmlParser
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -36,38 +31,37 @@ open class MoveDirTask @Inject constructor(
     }
 
     private fun Project.moveDir(moveFile: Map<String, String>) {
-        val manifestPackage = manifestFile().findPackage()  //查找清单文件里的package属性值
+        val manifestPackage = findPackage()  //查找清单文件里的package属性值
         // 1、替换manifest文件 、layout/navigation目录下的文件、Java、Kt文件
         val listFiles = resDir().listFiles { _, name ->
             //过滤res目录下的layout、navigation目录
             name.startsWith("layout") || name.startsWith("navigation")
         }?.toMutableList() ?: mutableListOf()
         listFiles.add(manifestFile())
-        listFiles.add(javaDir())
+        listFiles.addAll(javaDirs())
         files(listFiles).asFileTree.forEach {
             it.replaceText(moveFile, manifestPackage)
         }
 
         // 2、开始移动目录
         moveFile.forEach { (oldPath, newPath) ->
-            val oldDir = javaDir(oldPath.replace(".", File.separator))
-            if (oldPath == manifestPackage) {
-                //包名目录下的直接子类移动位置，需要重新手动导入R类及BuildConfig类(如果有用到的话)
-                oldDir.listFiles { f -> !f.isDirectory }?.forEach { file ->
-                    file.insertImportXxxIfAbsent(oldPath)
+            for (oldDir in javaDirs(oldPath.replace(".", File.separator))) {
+                if (!oldDir.exists()) {
+                    continue
                 }
+                if (oldPath == manifestPackage) {
+                    //包名目录下的直接子类移动位置，需要重新手动导入R类及BuildConfig类(如果有用到的话)
+                    oldDir.listFiles { f -> !f.isDirectory }?.forEach { file ->
+                        file.insertImportXxxIfAbsent(oldPath)
+                    }
+                }
+                copy {
+                    it.from(oldDir)
+                    it.into(javaDir(newPath.replace(".", File.separator), oldDir.absolutePath))
+                }
+                delete(oldDir)
             }
-            copy {
-                it.from(oldDir)
-                it.into(javaDir(newPath.replace(".", File.separator)))
-            }
-            delete(oldDir)
         }
-    }
-
-    private fun File.findPackage(): String? {
-        val rootNode = XmlParser(false, false).parse(this)
-        return rootNode.attribute("package")?.toString()
     }
 
     private fun File.replaceText(map: Map<String, String>, manifestPackage: String?) {

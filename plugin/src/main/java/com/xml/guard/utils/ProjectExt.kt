@@ -1,5 +1,6 @@
 package com.xml.guard.utils
 
+import com.android.build.gradle.BaseExtension
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
@@ -27,7 +28,33 @@ val whiteList = arrayListOf(
     "GridLayout", "GridView",
 )
 
-fun Project.javaDir(path: String = ""): File = file("src/main/java/$path")
+fun Project.findPackage(): String? {
+    val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
+    if (namespace != null) {
+        return namespace
+    }
+    val rootNode = XmlParser(false, false).parse(manifestFile())
+    return rootNode.attribute("package")?.toString()
+}
+
+fun Project.javaDir(path: String, lookPath: String): File {
+    val javaDirs = javaDirs("")
+    if (lookPath.isEmpty()) {
+        return file("${javaDirs[0]}/$path")
+    }
+    for (dir in javaDirs) {
+        if (lookPath.startsWith(dir.absolutePath)) {
+            return file("$dir/$path")
+        }
+    }
+    return file("${javaDirs[0]}/$path")
+}
+
+fun Project.javaDirs(path: String = ""): List<File> {
+    val sourceSet = (project.extensions.getByName("android") as BaseExtension).sourceSets
+    val javaDirs = sourceSet.getByName("main").java.srcDirs
+    return javaDirs.map { file("$it/$path") }
+}
 
 fun Project.resDir(path: String = ""): File = file("src/main/res/$path")
 
@@ -62,8 +89,8 @@ fun Project.isAndroidProject() =
 //查找dir所在的Project，dir不存在，返回null
 fun Project.findLocationProject(dir: String): Project? {
     val packageName = dir.replace(".", File.separator)
-    val absoluteDir = javaDir(packageName)
-    if (absoluteDir.exists()) {
+    val absoluteDirs = javaDirs(packageName)
+    if (absoluteDirs.any { it.exists() }) {
         return this
     }
     val dependencyProjects = mutableListOf<Project>()

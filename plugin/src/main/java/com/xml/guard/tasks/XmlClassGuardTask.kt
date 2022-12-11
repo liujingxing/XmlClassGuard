@@ -9,7 +9,7 @@ import com.xml.guard.utils.findClassByManifest
 import com.xml.guard.utils.findClassByNavigationXml
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.getDirPath
-import com.xml.guard.utils.javaDir
+import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.removeSuffix
 import com.xml.guard.utils.replaceWords
@@ -90,15 +90,20 @@ open class XmlClassGuardTask @Inject constructor(
             if (packageName != null && classPath.startsWith(packageName)) {
                 xmlText = xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
             }
+
+            // 内部类没有混淆，删除
+            if (mapping.isXmlInnerClass(classPath)) {
+                mapping.classMapping.remove(classPath)
+            }
         }
         xmlFile.writeText(xmlText)
     }
 
 
     private fun replaceJavaText(project: Project, mapping: Map<String, String>) {
-        val javaDir = project.javaDir()
+        val javaDirs = project.javaDirs()
         //遍历所有Java\Kt文件，替换混淆后的类的引用，import及new对象的地方
-        project.files(javaDir).asFileTree.forEach { javaFile ->
+        project.files(*javaDirs.toTypedArray()).asFileTree.forEach { javaFile ->
             var replaceText = javaFile.readText()
             mapping.forEach {
                 replaceText = replaceText(javaFile, replaceText, it.key, it.value)

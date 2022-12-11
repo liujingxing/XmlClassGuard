@@ -4,7 +4,7 @@ import com.android.build.gradle.BaseExtension
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDir
+import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.replaceWords
 import groovy.xml.XmlParser
@@ -52,10 +52,12 @@ open class PackageChangeTask @Inject constructor(
         }
 
         //3.对旧包名下的直接子类，检测R类、BuildConfig类是否有用到，有的话，插入import语句
-        javaDir(oldPackage.replace(".", File.separator))
-            .listFiles { f -> !f.isDirectory }
-            ?.forEach { file ->
-                file.insertImportXxxIfAbsent(newPackage)
+        javaDirs(oldPackage.replace(".", File.separator))
+            .forEach {
+                it.listFiles { f -> !f.isDirectory }
+                ?.forEach { file ->
+                    file.insertImportXxxIfAbsent(newPackage)
+                }
             }
     }
 
