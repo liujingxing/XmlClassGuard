@@ -66,7 +66,7 @@ open class PackageChangeTask @Inject constructor(
     private fun Project.modifyBuildGradleFile(map: Map<String, String>): String? {
         if (AgpVersion.versionCompare("4.2.0") < 0) return null
         val namespace =
-            (project.extensions.getByName("android") as BaseExtension).namespace ?: return null
+            (extensions.getByName("android") as BaseExtension).namespace ?: return null
         val newPackage = map[namespace] ?: return null
         buildFile.readText()
             .replace("namespace\\s+['\"]${namespace}['\"]".toRegex(), "namespace '$newPackage'")

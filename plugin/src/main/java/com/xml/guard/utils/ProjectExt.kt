@@ -30,7 +30,7 @@ val whiteList = arrayListOf(
 
 fun Project.findPackage(): String {
     if (AgpVersion.versionCompare("4.2.0") >= 0) {
-        val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
+        val namespace = (extensions.getByName("android") as BaseExtension).namespace
         if (namespace != null) {
             return namespace
         }
@@ -53,7 +53,7 @@ fun Project.javaDir(path: String, lookPath: String): File {
 }
 
 fun Project.javaDirs(path: String = ""): List<File> {
-    val sourceSet = (project.extensions.getByName("android") as BaseExtension).sourceSets
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
     val javaDirs = sourceSet.getByName("main").java.srcDirs
     return javaDirs.map { file("$it/$path") }
 }
