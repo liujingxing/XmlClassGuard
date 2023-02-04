@@ -1,15 +1,6 @@
 package com.xml.guard.model
 
-import com.xml.guard.utils.findLocationProject
-import com.xml.guard.utils.getDirPath
-import com.xml.guard.utils.getSuffix
-import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDir
-import com.xml.guard.utils.manifestFile
-import com.xml.guard.utils.removeSuffix
-import com.xml.guard.utils.toLetterStr
-import com.xml.guard.utils.toUpperLetterStr
-import groovy.xml.XmlParser
+import com.xml.guard.utils.*
 import org.gradle.api.Project
 import java.io.BufferedWriter
 import java.io.File
@@ -54,7 +45,6 @@ class Mapping {
     fun obfuscateAllClass(project: Project): Map<String, String> {
         val classMapped = mutableMapOf<String, String>()
         val iterator = dirMapping.iterator()
-        val manifestPackage = project.manifestFile().findPackage()
         while (iterator.hasNext()) {
             val entry = iterator.next()
             val rawDir = entry.key
@@ -63,13 +53,16 @@ class Mapping {
                 iterator.remove()
                 continue
             }
+            val manifestPackage = locationProject.findPackage()
             //去除目录的直接子文件
             val dirPath = rawDir.replace(".", File.separator)
-            val childFiles = locationProject.javaDir(dirPath).listFiles { f ->
-                val filename = f.name
-                f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
+            val childFiles = locationProject.javaDirs(dirPath).flatMap {
+                it.listFiles { f ->
+                    val filename = f.name
+                    f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
+                }?.toList() ?: emptyList()
             }
-            if (childFiles.isNullOrEmpty()) continue
+            if (childFiles.isEmpty()) continue
             for (file in childFiles) {
                 val rawClassPath = "${rawDir}.${file.name.removeSuffix()}"
                 //已经混淆
@@ -79,7 +72,7 @@ class Mapping {
                 }
                 val obfuscatePath = obfuscatePath(rawClassPath)
                 val relativePath = obfuscatePath.replace(".", File.separator) + file.name.getSuffix()
-                val newFile = locationProject.javaDir(relativePath)
+                val newFile = locationProject.javaDir(relativePath, file.absolutePath)
                 if (!newFile.exists()) newFile.parentFile.mkdirs()
                 newFile.writeText(file.readText())
                 file.delete()
@@ -91,14 +84,29 @@ class Mapping {
 
     fun isObfuscated(rawClassPath: String) = classMapping.containsValue(rawClassPath)
 
+    fun isXmlInnerClass(classPath: String): Boolean {
+        return classPath.contains("[a-zA-Z0-9_]+\\$[a-zA-Z0-9_]+".toRegex())
+    }
+
     //混淆包名+类名，返回混淆后的包名+类名
     fun obfuscatePath(rawClassPath: String): String {
         var obfuscateClassPath = classMapping[rawClassPath]
         if (obfuscateClassPath == null) {
             val rawPackage = rawClassPath.getDirPath()
             val obfuscatePackage = obfuscatePackage(rawPackage)
-            obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
-            classMapping[rawClassPath] = obfuscateClassPath
+            // 内部类，如：<service android:name=".TestBroadReceiver$NotifyJobService" />
+            if (isXmlInnerClass(rawClassPath)) {
+                obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
+                val arr = rawClassPath.split("$")
+                classMapping[arr[0]] = obfuscateClassPath
+
+                // 用于清单文件中替换
+                obfuscateClassPath = "$obfuscateClassPath\$${arr[1]}"
+                classMapping[rawClassPath] = obfuscateClassPath
+            } else {
+                obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
+                classMapping[rawClassPath] = obfuscateClassPath
+            }
         }
         return obfuscateClassPath
     }
@@ -154,12 +162,6 @@ class Mapping {
     private fun hash(key: Any): Int {
         val h = key.hashCode()
         return h xor (h ushr 16)
-    }
-
-
-    private fun File.findPackage(): String? {
-        val rootNode = XmlParser(false, false).parse(this)
-        return rootNode.attribute("package")?.toString()
     }
 
 }
