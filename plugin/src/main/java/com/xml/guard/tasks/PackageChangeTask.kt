@@ -2,6 +2,7 @@ package com.xml.guard.tasks
 
 import com.android.build.gradle.BaseExtension
 import com.xml.guard.entensions.GuardExtension
+import com.xml.guard.utils.AgpVersion
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDirs
@@ -63,6 +64,7 @@ open class PackageChangeTask @Inject constructor(
 
     //修复build.gradle文件的 namespace 语句，并返回namespace
     private fun Project.modifyBuildGradleFile(map: Map<String, String>): String? {
+        if (AgpVersion.versionCompare("4.2.0") < 0) return null
         val namespace =
             (project.extensions.getByName("android") as BaseExtension).namespace ?: return null
         val newPackage = map[namespace] ?: return null

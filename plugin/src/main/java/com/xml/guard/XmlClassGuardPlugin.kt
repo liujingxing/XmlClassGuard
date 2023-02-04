@@ -7,6 +7,7 @@ import com.xml.guard.tasks.FindConstraintReferencedIdsTask
 import com.xml.guard.tasks.MoveDirTask
 import com.xml.guard.tasks.PackageChangeTask
 import com.xml.guard.tasks.XmlClassGuardTask
+import com.xml.guard.utils.AgpVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +21,7 @@ class XmlClassGuardPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         checkApplicationPlugin(project)
-        println("XmlClassGuard version is $version")
+        println("XmlClassGuard version is $version, agpVersion=${AgpVersion.agpVersion}")
         val guardExtension = project.extensions.create("xmlClassGuard", GuardExtension::class.java)
         project.tasks.create("xmlClassGuard", XmlClassGuardTask::class.java, guardExtension)
         project.tasks.create("packageChange", PackageChangeTask::class.java, guardExtension)
@@ -40,7 +41,7 @@ class XmlClassGuardPlugin : Plugin<Project> {
         val variantName = variant.name.capitalize()
         val aabResGuardTaskName = "aabresguard$variantName"
         val aabResGuardTask = project.tasks.findByName(aabResGuardTaskName)
-            ?: throw  GradleException("AabResGuard plugin required")
+            ?: throw GradleException("AabResGuard plugin required")
         val findConstraintReferencedIdsTaskName = "findConstraintReferencedIds"
         val findConstraintReferencedIdsTask =
             project.tasks.findByName(findConstraintReferencedIdsTaskName) ?: project.tasks.create(
@@ -51,7 +52,7 @@ class XmlClassGuardPlugin : Plugin<Project> {
 
     private fun checkApplicationPlugin(project: Project) {
         if (!project.plugins.hasPlugin("com.android.application")) {
-            throw  GradleException("Android Application plugin required")
+            throw GradleException("Android Application plugin required")
         }
     }
 }

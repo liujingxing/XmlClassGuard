@@ -28,13 +28,15 @@ val whiteList = arrayListOf(
     "GridLayout", "GridView",
 )
 
-fun Project.findPackage(): String? {
-    val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
-    if (namespace != null) {
-        return namespace
+fun Project.findPackage(): String {
+    if (AgpVersion.versionCompare("4.2.0") >= 0) {
+        val namespace = (project.extensions.getByName("android") as BaseExtension).namespace
+        if (namespace != null) {
+            return namespace
+        }
     }
     val rootNode = XmlParser(false, false).parse(manifestFile())
-    return rootNode.attribute("package")?.toString()
+    return rootNode.attribute("package").toString()
 }
 
 fun Project.javaDir(path: String, lookPath: String): File {
@@ -130,11 +132,10 @@ fun findClassByNavigationXml(text: String, classPaths: MutableList<String>) {
 }
 
 //在manifest文件里，查找四大组件及Application，返回文件的package属性，即包名
-fun findClassByManifest(text: String, classPaths: MutableList<String>, namespace: String?): String {
+fun findClassByManifest(text: String, classPaths: MutableList<String>, packageName: String) {
     val rootNode = XmlParser(false, false).parseText(text)
-    val packageName = namespace ?: rootNode.attribute("package").toString()
-    val nodeList = rootNode.get("application") as? NodeList ?: return packageName
-    val applicationNode = nodeList.firstOrNull() as? Node ?: return packageName
+    val nodeList = rootNode.get("application") as? NodeList ?: return
+    val applicationNode = nodeList.firstOrNull() as? Node ?: return
     val application = applicationNode.attribute("android:name")?.toString()
     if (application != null) {
         val classPath = if (application.startsWith(".")) packageName + application else application
@@ -151,5 +152,4 @@ fun findClassByManifest(text: String, classPaths: MutableList<String>, namespace
             classPaths.add(classPath)
         }
     }
-    return packageName
 }
