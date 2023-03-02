@@ -66,7 +66,13 @@ xmlClassGuard {
      * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
      * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
      */
-    findConstraintReferencedIds = true
+    findAabConstraintReferencedIds = true
+
+    /*
+     * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AndResGuard的白名单中，
+     * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
+     */
+    findAndConstraintReferencedIds = false
     //用于增量混淆的 mapping 文件
     mappingFile = file("xml-class-mapping.txt")
     //更改manifest文件的package属性，即包名
