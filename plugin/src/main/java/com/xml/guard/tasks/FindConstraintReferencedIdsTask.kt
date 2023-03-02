@@ -1,6 +1,9 @@
 package com.xml.guard.tasks
 
 import com.bytedance.android.plugin.extensions.AabResGuardExtension
+import com.tencent.gradle.AndResGuardExtension
+import com.xml.guard.model.aabResGuard
+import com.xml.guard.model.andResGuard
 import com.xml.guard.utils.isAndroidProject
 import com.xml.guard.utils.resDir
 import groovy.util.Node
@@ -9,16 +12,16 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.util.*
+import javax.inject.Inject
 
 /**
  * User: ljx
  * Date: 2022/4/3
  * Time: 20:17
  */
-open class FindConstraintReferencedIdsTask : DefaultTask() {
-
-    private val aabResGuard: AabResGuardExtension =
-        project.extensions.getByName("aabResGuard") as AabResGuardExtension
+open class FindConstraintReferencedIdsTask @Inject constructor(
+    private val extensionName: String
+) : DefaultTask() {
 
     init {
         group = "guard"
@@ -35,11 +38,20 @@ open class FindConstraintReferencedIdsTask : DefaultTask() {
             }
         }
         val set = findReferencedIds(layoutDirs)
-        (aabResGuard.whiteList as HashSet).addAll(set)
         println("ids size is ${set.size} \n$set")
+        val extension = project.extensions.getByName(extensionName)
+        val whiteList =
+            if (andResGuard == extensionName && extension is AndResGuardExtension) {
+                extension.whiteList
+            } else if (aabResGuard == extensionName && extension is AabResGuardExtension) {
+                extension.whiteList
+            } else {
+                throw IllegalArgumentException("extensionName is $extensionName")
+            }
+        (whiteList as MutableCollection<String>).addAll(set)
     }
 
-    private fun findReferencedIds(layoutDirs: List<File>): Set<String> {
+    private fun findReferencedIds(layoutDirs: List<File>): Collection<String> {
         val set = HashSet<String>()
         layoutDirs
             .flatMap {
@@ -61,7 +73,7 @@ open class FindConstraintReferencedIdsTask : DefaultTask() {
             ids.split(",").forEach {
                 val id = it.trim()
                 if (id.isNotEmpty()) {
-                    set.add("*.R.id.${id}")
+                    set.add(if (aabResGuard == extensionName) "*.R.id.${id}" else "R.id.${id}")
                 }
             }
         }

@@ -1,8 +1,9 @@
 package com.xml.guard
 
 import com.android.build.gradle.AppExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.xml.guard.entensions.GuardExtension
+import com.xml.guard.model.aabResGuard
+import com.xml.guard.model.andResGuard
 import com.xml.guard.tasks.FindConstraintReferencedIdsTask
 import com.xml.guard.tasks.MoveDirTask
 import com.xml.guard.tasks.PackageChangeTask
@@ -29,24 +30,51 @@ class XmlClassGuardPlugin : Plugin<Project> {
 
         val android = project.extensions.getByName("android") as AppExtension
         project.afterEvaluate {
-            if (guardExtension.findConstraintReferencedIds) {
-                android.applicationVariants.all { variant ->
-                    createFindConstraintReferencedIds(project, variant)
+            android.applicationVariants.all { variant ->
+                val variantName = variant.name.capitalize()
+                if (guardExtension.findAndConstraintReferencedIds) {
+                    createAndFindConstraintReferencedIds(project, variantName)
+                }
+                if (guardExtension.findAabConstraintReferencedIds) {
+                    createAabFindConstraintReferencedIds(project, variantName)
                 }
             }
         }
     }
 
-    private fun createFindConstraintReferencedIds(project: Project, variant: ApplicationVariant) {
-        val variantName = variant.name.capitalize()
+    private fun createAndFindConstraintReferencedIds(
+        project: Project,
+        variantName: String
+    ) {
+        val andResGuardTaskName = "resguard$variantName"
+        val andResGuardTask = project.tasks.findByName(andResGuardTaskName)
+            ?: throw GradleException("AndResGuard plugin required")
+        val findConstraintReferencedIdsTaskName = "andFindConstraintReferencedIds"
+        val findConstraintReferencedIdsTask =
+            project.tasks.findByName(findConstraintReferencedIdsTaskName)
+                ?: project.tasks.create(
+                    findConstraintReferencedIdsTaskName,
+                    FindConstraintReferencedIdsTask::class.java,
+                    andResGuard
+                )
+        andResGuardTask.dependsOn(findConstraintReferencedIdsTask)
+    }
+
+    private fun createAabFindConstraintReferencedIds(
+        project: Project,
+        variantName: String
+    ) {
         val aabResGuardTaskName = "aabresguard$variantName"
         val aabResGuardTask = project.tasks.findByName(aabResGuardTaskName)
             ?: throw GradleException("AabResGuard plugin required")
-        val findConstraintReferencedIdsTaskName = "findConstraintReferencedIds"
+        val findConstraintReferencedIdsTaskName = "aabFindConstraintReferencedIds"
         val findConstraintReferencedIdsTask =
-            project.tasks.findByName(findConstraintReferencedIdsTaskName) ?: project.tasks.create(
-                findConstraintReferencedIdsTaskName, FindConstraintReferencedIdsTask::class.java
-            )
+            project.tasks.findByName(findConstraintReferencedIdsTaskName)
+                ?: project.tasks.create(
+                    findConstraintReferencedIdsTaskName,
+                    FindConstraintReferencedIdsTask::class.java,
+                    aabResGuard
+                )
         aabResGuardTask.dependsOn(findConstraintReferencedIdsTask)
     }
 

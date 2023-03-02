@@ -27,4 +27,5 @@ dependencies {
     api 'org.codehaus.groovy:groovy-xml:3.0.9'
     compileOnly 'com.android.tools.build:gradle:7.4.1'
     compileOnly "com.bytedance.android:aabresguard-plugin:0.1.10"
+    compileOnly 'com.tencent.mm:AndResGuard-gradle-plugin:1.2.21'
 }

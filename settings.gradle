@@ -16,6 +16,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
+        jcenter()   //AndResGuard在jcenter上
     }
 }
 rootProject.name = "XmlClassGuard"
