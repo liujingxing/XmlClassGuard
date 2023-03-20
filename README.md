@@ -1,7 +1,7 @@
 [![](https://jitpack.io/v/liujingxing/XmlClassGuard.svg)](https://jitpack.io/#liujingxing/XmlClassGuard)
 [![](https://img.shields.io/badge/change-更新日志-success.svg)](https://github.com/liujingxing/XmlClassGuard/wiki)
 [![](https://img.shields.io/badge/FAQ-常见问题-success.svg)](https://github.com/liujingxing/XmlClassGuard/wiki/FAQ)
-[![](https://img.shields.io/badge/掘金-@不怕天黑-blue.svg)](https://juejin.cn/user/272334612601559/posts)
+[![](https://img.shields.io/badge/掘金-@刘一刀-blue.svg)](https://juejin.cn/user/272334612601559/posts)
 
 ***加我微信 ljx-studio 拉你进微信群(备注XmlClassGuard，否则不通过)***
 
