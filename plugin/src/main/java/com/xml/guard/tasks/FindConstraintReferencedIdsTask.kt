@@ -5,7 +5,7 @@ import com.tencent.gradle.AndResGuardExtension
 import com.xml.guard.model.aabResGuard
 import com.xml.guard.model.andResGuard
 import com.xml.guard.utils.isAndroidProject
-import com.xml.guard.utils.resDir
+import com.xml.guard.utils.resDirs
 import groovy.util.Node
 import groovy.xml.XmlParser
 import org.gradle.api.DefaultTask
@@ -32,9 +32,11 @@ open class FindConstraintReferencedIdsTask @Inject constructor(
         val layoutDirs = mutableListOf<File>()
         project.rootProject.subprojects {
             if (it.isAndroidProject()) {
-                it.resDir().listFiles { file ->
-                    file.isDirectory && file.name.startsWith("layout")   //过滤res目录下的layout
-                }?.apply { layoutDirs.addAll(this) }
+                it.resDirs().flatMapTo(layoutDirs) { dir ->
+                    dir.listFiles { file ->
+                        file.isDirectory && file.name.startsWith("layout")   //过滤res目录下的layout
+                    }?.toList() ?: emptyList()
+                }
             }
         }
         val set = findReferencedIds(layoutDirs)

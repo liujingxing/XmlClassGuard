@@ -5,7 +5,6 @@ import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
 import java.io.File
 
@@ -39,32 +38,24 @@ fun Project.findPackage(): String {
     return rootNode.attribute("package").toString()
 }
 
-fun Project.javaDir(path: String, lookPath: String): File {
-    val javaDirs = javaDirs("")
-    if (lookPath.isEmpty()) {
-        return file("${javaDirs[0]}/$path")
-    }
-    for (dir in javaDirs) {
-        if (lookPath.startsWith(dir.absolutePath)) {
-            return file("$dir/$path")
-        }
-    }
-    return file("${javaDirs[0]}/$path")
-}
-
+//返回java/kotlin代码目录,可能有多个
 fun Project.javaDirs(path: String = ""): List<File> {
     val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
     val javaDirs = sourceSet.getByName("main").java.srcDirs
-    return javaDirs.map { file("$it/$path") }
+    return javaDirs.map { File(it, path) }
 }
 
-fun Project.resDir(path: String = ""): File = file("src/main/res/$path")
+//返回res目录,可能有多个
+fun Project.resDirs(path: String = ""): List<File> {
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    return sourceSet.getByName("main").res.srcDirs.map { File(it, path) }
+}
 
-fun Project.manifestFile(): File = file("src/main/AndroidManifest.xml")
-
-fun Project.javaTree(path: String = ""): ConfigurableFileTree = fileTree("src/main/java/$path")
-
-fun Project.resTree(path: String = ""): ConfigurableFileTree = fileTree("src/main/res/$path")
+//返回manifest文件目录,有且仅有一个
+fun Project.manifestFile(): File {
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    return sourceSet.getByName("main").manifest.srcFile
+}
 
 
 //查找依赖的Android Project，也就是子 module，包括间接依赖的子 module

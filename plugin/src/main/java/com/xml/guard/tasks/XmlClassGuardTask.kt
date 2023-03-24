@@ -13,7 +13,7 @@ import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.removeSuffix
 import com.xml.guard.utils.replaceWords
-import com.xml.guard.utils.resDir
+import com.xml.guard.utils.resDirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -53,12 +53,14 @@ open class XmlClassGuardTask @Inject constructor(
 
     //处理res目录
     private fun handleResDir(project: Project) {
-        val listFiles = project.resDir().listFiles { _, name ->
-            //过滤res目录下的layout、navigation目录
-            name.startsWith("layout") || name.startsWith("navigation")
-        }?.toMutableList() ?: return
-        listFiles.add(project.manifestFile())
-        project.files(listFiles).asFileTree.forEach { xmlFile ->
+        val xmlDirs = project.resDirs().flatMapTo(ArrayList()) { dir ->
+            dir.listFiles { _, name ->
+                //过滤res目录下的layout、navigation目录
+                name.startsWith("layout") || name.startsWith("navigation")
+            }?.toList() ?: emptyList()
+        }
+        xmlDirs.add(project.manifestFile())
+        project.files(xmlDirs).asFileTree.forEach { xmlFile ->
             guardXml(project, xmlFile)
         }
     }
@@ -105,7 +107,7 @@ open class XmlClassGuardTask @Inject constructor(
     private fun replaceJavaText(project: Project, mapping: Map<String, String>) {
         val javaDirs = project.javaDirs()
         //遍历所有Java\Kt文件，替换混淆后的类的引用，import及new对象的地方
-        project.files(*javaDirs.toTypedArray()).asFileTree.forEach { javaFile ->
+        project.files(javaDirs).asFileTree.forEach { javaFile ->
             var replaceText = javaFile.readText()
             mapping.forEach {
                 replaceText = replaceText(javaFile, replaceText, it.key, it.value)

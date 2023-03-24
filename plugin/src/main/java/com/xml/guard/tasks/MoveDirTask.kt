@@ -1,8 +1,13 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
-import com.xml.guard.utils.*
-import groovy.xml.XmlParser
+import com.xml.guard.utils.allDependencyAndroidProjects
+import com.xml.guard.utils.findPackage
+import com.xml.guard.utils.insertImportXxxIfAbsent
+import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.manifestFile
+import com.xml.guard.utils.replaceWords
+import com.xml.guard.utils.resDirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -32,14 +37,16 @@ open class MoveDirTask @Inject constructor(
 
     private fun Project.moveDir(moveFile: Map<String, String>) {
         val manifestPackage = findPackage()  //查找清单文件里的package属性值
-        // 1、替换manifest文件 、layout/navigation目录下的文件、Java、Kt文件
-        val listFiles = resDir().listFiles { _, name ->
-            //过滤res目录下的layout、navigation目录
-            name.startsWith("layout") || name.startsWith("navigation")
-        }?.toMutableList() ?: mutableListOf()
-        listFiles.add(manifestFile())
-        listFiles.addAll(javaDirs())
-        files(listFiles).asFileTree.forEach {
+        //1、替换manifest文件 、layout/navigation目录下的文件、Java、Kt文件
+        val dirs = project.resDirs().flatMapTo(ArrayList()) { dir ->
+            dir.listFiles { _, name ->
+                //过滤res目录下的layout、navigation目录
+                name.startsWith("layout") || name.startsWith("navigation")
+            }?.toList() ?: emptyList()
+        }
+        dirs.add(manifestFile())
+        dirs.addAll(javaDirs())
+        files(dirs).asFileTree.forEach {
             it.replaceText(moveFile, manifestPackage)
         }
 
@@ -55,9 +62,12 @@ open class MoveDirTask @Inject constructor(
                         file.insertImportXxxIfAbsent(oldPath)
                     }
                 }
+                val oldRelativePath = oldPath.replace(".", File.separator)
+                val newRelativePath = newPath.replace(".", File.separator)
+                val toFile = File(oldDir.absolutePath.replace(oldRelativePath, newRelativePath))
                 copy {
                     it.from(oldDir)
-                    it.into(javaDir(newPath.replace(".", File.separator), oldDir.absolutePath))
+                    it.into(toFile)
                 }
                 delete(oldDir)
             }
@@ -67,12 +77,13 @@ open class MoveDirTask @Inject constructor(
     private fun File.replaceText(map: Map<String, String>, manifestPackage: String?) {
         var replaceText = readText()
         map.forEach { (oldPath, newPath) ->
-            replaceText = if (name == "AndroidManifest.xml" && oldPath == manifestPackage) {
-                replaceText.replaceWords("$oldPath.", "$newPath.")
-                    .replaceWords("""android:name=".""", """android:name="${newPath}.""")
-            } else {
-                replaceText.replaceWords(oldPath, newPath)
-            }
+            replaceText =
+                if (name == "AndroidManifest.xml" && oldPath == manifestPackage) {
+                    replaceText.replaceWords("$oldPath.", "$newPath.")
+                        .replaceWords("""android:name=".""", """android:name="${newPath}.""")
+                } else {
+                    replaceText.replaceWords(oldPath, newPath)
+                }
             if (name.endsWith(".kt") || name.endsWith(".java")) {
                 /*
                  移动目录时，manifest里的package属性不会更改

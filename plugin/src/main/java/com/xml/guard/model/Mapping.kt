@@ -1,6 +1,13 @@
 package com.xml.guard.model
 
-import com.xml.guard.utils.*
+import com.xml.guard.utils.findLocationProject
+import com.xml.guard.utils.findPackage
+import com.xml.guard.utils.getDirPath
+import com.xml.guard.utils.insertImportXxxIfAbsent
+import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.removeSuffix
+import com.xml.guard.utils.toLetterStr
+import com.xml.guard.utils.toUpperLetterStr
 import org.gradle.api.Project
 import java.io.BufferedWriter
 import java.io.File
@@ -71,8 +78,10 @@ class Mapping {
                     file.insertImportXxxIfAbsent(manifestPackage)
                 }
                 val obfuscatePath = obfuscatePath(rawClassPath)
-                val relativePath = obfuscatePath.replace(".", File.separator) + file.name.getSuffix()
-                val newFile = locationProject.javaDir(relativePath, file.absolutePath)
+                val obfuscateRelativePath = obfuscatePath.replace(".", File.separator)
+                val rawRelativePath = rawClassPath.replace(".", File.separator)
+                //替换原始类路径
+                val newFile = File(file.absolutePath.replace(rawRelativePath, obfuscateRelativePath))
                 if (!newFile.exists()) newFile.parentFile.mkdirs()
                 newFile.writeText(file.readText())
                 file.delete()
