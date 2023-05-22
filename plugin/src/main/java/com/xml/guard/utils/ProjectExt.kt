@@ -51,6 +51,24 @@ fun Project.resDirs(path: String = ""): List<File> {
     return sourceSet.getByName("main").res.srcDirs.map { File(it, path) }
 }
 
+fun Project.fullVariantResDirs(path: String = "", variantName: String): List<File> {
+    println("fullVariantResDirs,variantName:$variantName")
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val variants = splitVariantString(variantName)
+    variants.forEach {
+        println("fullVariantResDirs,variant:$it")
+    }
+    val fileList = mutableListOf<File>()
+    sourceSet.names.forEach { sourceFileName ->
+        println("fullVariantResDirs,sourceFileName:$sourceFileName")
+        if(sourceFileName.equals("main", true) || variants.contains(sourceFileName)) {
+            println("fullVariantResDirs,sourceFileName:$sourceFileName checked")
+            fileList.addAll(sourceSet.getByName(sourceFileName).res.srcDirs.map { File(it, path) })
+        }
+    }
+    return fileList
+}
+
 //返回manifest文件目录,有且仅有一个
 fun Project.manifestFile(): File {
     val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
@@ -143,4 +161,9 @@ fun findClassByManifest(text: String, classPaths: MutableList<String>, packageNa
             classPaths.add(classPath)
         }
     }
+}
+
+private fun splitVariantString(variantName: String): List<String> {
+    val regex = Regex("(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+    return variantName.split(regex).map { it.lowercase() }
 }
