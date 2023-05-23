@@ -41,6 +41,8 @@
 
 - 可查找`constraint_referenced_ids`属性的值，并自动添加到`AabResGuard`的白名单中
 
+- 可查找`constraint_referenced_ids`属性的值，并自动添加到`AndResGuard`的白名单中
+
 - `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AabResGuard](https://github.com/bytedance/AabResGuard)对应
 
 
@@ -94,7 +96,7 @@ xmlClassGuard {
 
     /*
      * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AndResGuard的白名单中，
-     * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
+     * 是的话，要求你在XmlClassGuard前依赖AndResGuard插件，默认false
      */
     findAndConstraintReferencedIds = false
     //用于增量混淆的 mapping 文件
@@ -118,9 +120,9 @@ xmlClassGuard {
 
 该任务需要配合[AabResGuard](https://github.com/bytedance/AabResGuard)插件使用，如果你未使用AabResGuard插件，可忽略。
 
-这里简单介绍下，由于约束布局`constraint_referenced_ids`属性的值，内部是通过getIdentifier方法获取具体的id，这就要求我们把`constraint_referenced_ids`属性的值添加进`AabResGurad`的白名单中，否则打包时，id会被混淆，打包后，`constraint_referenced_ids`属性会失效，UI将出现异常。
+这里简单介绍下，由于约束布局`constraint_referenced_ids`属性的值，内部是通过getIdentifier方法获取具体的id，这就要求我们把`constraint_referenced_ids`属性的值添加进`AabResGuard`的白名单中，否则打包时，id会被混淆，打包后，`constraint_referenced_ids`属性会失效，UI将出现异常。
 
-然而，项目中可能很多地方都用到`constraint_referenced_ids`属性，并且值非常多，要一个个找出来并手动添加到`AabResGuard`的白名单中，无疑是一项繁琐的工作，于是乎，`findConstraintReferencedIds`任务就派上用场了，它是在打包时，自动查找`constraint_referenced_ids`属性并添加进`AabResGuard`的白名单中，非常实用的功能，你仅需要在`XmlClassGurad`的配置`findConstraintReferencedIds`为true即可，如下：
+然而，项目中可能很多地方都用到`constraint_referenced_ids`属性，并且值非常多，要一个个找出来并手动添加到`AabResGuard`的白名单中，无疑是一项繁琐的工作，于是乎，`findAabConstraintReferencedIds`任务就派上用场了，它是在打包时，自动查找`constraint_referenced_ids`属性并添加进`AabResGuard`的白名单中，非常实用的功能，你仅需要在`XmlClassGurad`的配置`findAabConstraintReferencedIds`为true即可，如下：
 
 ```gradle
 //以下均为非必须
@@ -129,7 +131,7 @@ xmlClassGuard {
      * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
      * true的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
      */
-    findConstraintReferencedIds = true
+    findAabConstraintReferencedIds = true
 }
 ```
 `findConstraintReferencedIds`任务不需要手动执行，打包(aab)时会自动执行
