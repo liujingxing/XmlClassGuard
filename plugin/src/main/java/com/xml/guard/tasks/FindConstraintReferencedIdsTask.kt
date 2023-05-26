@@ -4,8 +4,8 @@ import com.bytedance.android.plugin.extensions.AabResGuardExtension
 import com.tencent.gradle.AndResGuardExtension
 import com.xml.guard.model.aabResGuard
 import com.xml.guard.model.andResGuard
+import com.xml.guard.utils.fullVariantResDirs
 import com.xml.guard.utils.isAndroidProject
-import com.xml.guard.utils.resDirs
 import groovy.util.Node
 import groovy.xml.XmlParser
 import org.gradle.api.DefaultTask
@@ -20,7 +20,8 @@ import javax.inject.Inject
  * Time: 20:17
  */
 open class FindConstraintReferencedIdsTask @Inject constructor(
-    private val extensionName: String
+    private val extensionName: String,
+    private val variantName: String,
 ) : DefaultTask() {
 
     init {
@@ -32,7 +33,7 @@ open class FindConstraintReferencedIdsTask @Inject constructor(
         val layoutDirs = mutableListOf<File>()
         project.rootProject.subprojects {
             if (it.isAndroidProject()) {
-                it.resDirs().flatMapTo(layoutDirs) { dir ->
+                it.fullVariantResDirs(variantName = variantName).flatMapTo(layoutDirs) { dir ->
                     dir.listFiles { file ->
                         file.isDirectory && file.name.startsWith("layout")   //过滤res目录下的layout
                     }?.toList() ?: emptyList()

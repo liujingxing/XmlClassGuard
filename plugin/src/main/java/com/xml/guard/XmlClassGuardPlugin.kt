@@ -32,6 +32,13 @@ class XmlClassGuardPlugin : Plugin<Project> {
         project.afterEvaluate {
             android.applicationVariants.all { variant ->
                 val variantName = variant.name.capitalize()
+
+                val minifyTaskName = "minify${variant.name.capitalize()}WithR8"
+
+                if (project.tasks.findByName(minifyTaskName) == null) {
+                    return@all
+                }
+
                 if (guardExtension.findAndConstraintReferencedIds) {
                     createAndFindConstraintReferencedIds(project, variantName)
                 }
@@ -49,13 +56,14 @@ class XmlClassGuardPlugin : Plugin<Project> {
         val andResGuardTaskName = "resguard$variantName"
         val andResGuardTask = project.tasks.findByName(andResGuardTaskName)
             ?: throw GradleException("AndResGuard plugin required")
-        val findConstraintReferencedIdsTaskName = "andFindConstraintReferencedIds"
+        val findConstraintReferencedIdsTaskName = "andFind${variantName}ConstraintReferencedIds"
         val findConstraintReferencedIdsTask =
             project.tasks.findByName(findConstraintReferencedIdsTaskName)
                 ?: project.tasks.create(
                     findConstraintReferencedIdsTaskName,
                     FindConstraintReferencedIdsTask::class.java,
-                    andResGuard
+                    andResGuard,
+                    variantName
                 )
         andResGuardTask.dependsOn(findConstraintReferencedIdsTask)
     }
@@ -73,7 +81,8 @@ class XmlClassGuardPlugin : Plugin<Project> {
                 ?: project.tasks.create(
                     findConstraintReferencedIdsTaskName,
                     FindConstraintReferencedIdsTask::class.java,
-                    aabResGuard
+                    aabResGuard,
+                    variantName
                 )
         aabResGuardTask.dependsOn(findConstraintReferencedIdsTask)
     }
