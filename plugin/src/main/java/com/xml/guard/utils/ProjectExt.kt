@@ -39,34 +39,41 @@ fun Project.findPackage(): String {
 }
 
 //返回java/kotlin代码目录,可能有多个
-fun Project.javaDirs(path: String = ""): List<File> {
+fun Project.javaDirs(variantName: String): List<File> {
     val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
-    val javaDirs = sourceSet.getByName("main").java.srcDirs
-    return javaDirs.map { File(it, path) }
+    val nameSet = mutableSetOf<String>()
+    nameSet.add("main")
+    if (isAndroidProject()) {
+        nameSet.addAll(variantName.splitWords())
+    }
+    val javaDirs = mutableListOf<File>()
+    sourceSet.names.forEach { name ->
+        if (nameSet.contains(name)) {
+            sourceSet.getByName(name).java.srcDirs.mapNotNullTo(javaDirs) {
+                if (it.exists()) it else null
+            }
+        }
+    }
+    return javaDirs
 }
 
 //返回res目录,可能有多个
-fun Project.resDirs(path: String = ""): List<File> {
+fun Project.resDirs(variantName: String): List<File> {
     val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
-    return sourceSet.getByName("main").res.srcDirs.map { File(it, path) }
-}
-
-fun Project.fullVariantResDirs(path: String = "", variantName: String): List<File> {
-    println("fullVariantResDirs,variantName:$variantName")
-    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
-    val variants = splitVariantString(variantName)
-    variants.forEach {
-        println("fullVariantResDirs,variant:$it")
+    val nameSet = mutableSetOf<String>()
+    nameSet.add("main")
+    if (isAndroidProject()) {
+        nameSet.addAll(variantName.splitWords())
     }
-    val fileList = mutableListOf<File>()
-    sourceSet.names.forEach { sourceFileName ->
-        println("fullVariantResDirs,sourceFileName:$sourceFileName")
-        if(sourceFileName.equals("main", true) || variants.contains(sourceFileName)) {
-            println("fullVariantResDirs,sourceFileName:$sourceFileName checked")
-            fileList.addAll(sourceSet.getByName(sourceFileName).res.srcDirs.map { File(it, path) })
+    val resDirs = mutableListOf<File>()
+    sourceSet.names.forEach { name ->
+        if (nameSet.contains(name)) {
+            sourceSet.getByName(name).res.srcDirs.mapNotNullTo(resDirs) {
+                if (it.exists()) it else null
+            }
         }
     }
-    return fileList
+    return resDirs
 }
 
 //返回manifest文件目录,有且仅有一个
@@ -98,16 +105,16 @@ fun Project.isAndroidProject() =
             || plugins.hasPlugin("com.android.library")
 
 //查找dir所在的Project，dir不存在，返回null
-fun Project.findLocationProject(dir: String): Project? {
+fun Project.findLocationProject(dir: String, variantName: String): Project? {
     val packageName = dir.replace(".", File.separator)
-    val absoluteDirs = javaDirs(packageName)
-    if (absoluteDirs.any { it.exists() }) {
+    val javaDirs = javaDirs(variantName)
+    if (javaDirs.any { File(it, packageName).exists() }) {
         return this
     }
     val dependencyProjects = mutableListOf<Project>()
     findDependencyAndroidProject(dependencyProjects)
     dependencyProjects.forEach {
-        val project = it.findLocationProject(dir)
+        val project = it.findLocationProject(dir, variantName)
         if (project != null) return project
     }
     return null
@@ -161,9 +168,4 @@ fun findClassByManifest(text: String, classPaths: MutableList<String>, packageNa
             classPaths.add(classPath)
         }
     }
-}
-
-private fun splitVariantString(variantName: String): List<String> {
-    val regex = Regex("(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
-    return variantName.split(regex).map { it.lowercase() }
 }

@@ -136,3 +136,8 @@ fun String.to26Long(): Long {
     }
     return num
 }
+
+internal fun String.splitWords(): List<String> {
+    val regex = Regex("(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+    return split(regex).map { it.lowercase() }
+}

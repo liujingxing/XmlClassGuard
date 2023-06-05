@@ -21,7 +21,8 @@ import javax.inject.Inject
  * Time: 19:06
  */
 open class PackageChangeTask @Inject constructor(
-    private val guardExtension: GuardExtension
+    private val guardExtension: GuardExtension,
+    private val variantName: String,
 ) : DefaultTask() {
 
     init {
@@ -43,8 +44,9 @@ open class PackageChangeTask @Inject constructor(
         val pair = modifyManifestFile(map, namespace) ?: return
         val oldPackage = pair.first
         val newPackage = pair.second
+        val javaDirs = javaDirs(variantName)
         //3.修改 kt/java文件
-        files(javaDirs()).asFileTree.forEach { javaFile ->
+        files(javaDirs).asFileTree.forEach { javaFile ->
             javaFile.readText()
                 .replaceWords("$oldPackage.R", "$newPackage.R")
                 .replaceWords("$oldPackage.BuildConfig", "$newPackage.BuildConfig")
@@ -53,10 +55,9 @@ open class PackageChangeTask @Inject constructor(
         }
 
         //3.对旧包名下的直接子类，检测R类、BuildConfig类是否有用到，有的话，插入import语句
-        javaDirs(oldPackage.replace(".", File.separator)).forEach {
-            it.listFiles { f ->
-                !f.isDirectory
-            }?.forEach { file ->
+        val oldPackagePath = oldPackage.replace(".", File.separator)
+        javaDirs.forEach {
+            File(it, oldPackagePath).listFiles { f -> f.isFile }?.forEach { file ->
                 file.insertImportXxxIfAbsent(newPackage)
             }
         }

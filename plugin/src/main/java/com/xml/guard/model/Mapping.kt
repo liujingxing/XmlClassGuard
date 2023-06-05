@@ -49,13 +49,13 @@ class Mapping {
     internal var packageNameIndex = -1L
 
     //遍历文件夹下的所有直接子类，混淆文件名及移动目录
-    fun obfuscateAllClass(project: Project): Map<String, String> {
+    fun obfuscateAllClass(project: Project, variantName: String): Map<String, String> {
         val classMapped = mutableMapOf<String, String>()
         val iterator = dirMapping.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
             val rawDir = entry.key
-            val locationProject = project.findLocationProject(rawDir)
+            val locationProject = project.findLocationProject(rawDir, variantName)
             if (locationProject == null) {
                 iterator.remove()
                 continue
@@ -63,8 +63,8 @@ class Mapping {
             val manifestPackage = locationProject.findPackage()
             //去除目录的直接子文件
             val dirPath = rawDir.replace(".", File.separator)
-            val childFiles = locationProject.javaDirs(dirPath).flatMap {
-                it.listFiles { f ->
+            val childFiles = locationProject.javaDirs(variantName).flatMap {
+                File(it, dirPath).listFiles { f ->
                     val filename = f.name
                     f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
                 }?.toList() ?: emptyList()

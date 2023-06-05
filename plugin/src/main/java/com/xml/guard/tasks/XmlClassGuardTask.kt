@@ -26,7 +26,8 @@ import javax.inject.Inject
  * Time: 19:06
  */
 open class XmlClassGuardTask @Inject constructor(
-    guardExtension: GuardExtension
+    guardExtension: GuardExtension,
+    private val variantName: String,
 ) : DefaultTask() {
 
     init {
@@ -42,7 +43,7 @@ open class XmlClassGuardTask @Inject constructor(
         //1、遍历res下的xml文件，找到自定义的类(View/Fragment/四大组件等)，并将混淆结果同步到xml文件内
         androidProjects.forEach { handleResDir(it) }
         //2、混淆文件名及文件路径，返回本次混淆的类
-        val classMapping = mapping.obfuscateAllClass(project)
+        val classMapping = mapping.obfuscateAllClass(project, variantName)
         //3、替换Java/kotlin文件里引用到的类
         if (classMapping.isNotEmpty()) {
             androidProjects.forEach { replaceJavaText(it, classMapping) }
@@ -53,7 +54,7 @@ open class XmlClassGuardTask @Inject constructor(
 
     //处理res目录
     private fun handleResDir(project: Project) {
-        val xmlDirs = project.resDirs().flatMapTo(ArrayList()) { dir ->
+        val xmlDirs = project.resDirs(variantName).flatMapTo(ArrayList()) { dir ->
             dir.listFiles { _, name ->
                 //过滤res目录下的layout、navigation目录
                 name.startsWith("layout") || name.startsWith("navigation")
@@ -86,7 +87,7 @@ open class XmlClassGuardTask @Inject constructor(
         for (classPath in classPaths) {
             val dirPath = classPath.getDirPath()
             //本地不存在这个文件
-            if (project.findLocationProject(dirPath) == null) continue
+            if (project.findLocationProject(dirPath, variantName) == null) continue
             //已经混淆了这个类
             if (mapping.isObfuscated(classPath)) continue
             val obfuscatePath = mapping.obfuscatePath(classPath)
@@ -105,7 +106,7 @@ open class XmlClassGuardTask @Inject constructor(
 
 
     private fun replaceJavaText(project: Project, mapping: Map<String, String>) {
-        val javaDirs = project.javaDirs()
+        val javaDirs = project.javaDirs(variantName)
         //遍历所有Java\Kt文件，替换混淆后的类的引用，import及new对象的地方
         project.files(javaDirs).asFileTree.forEach { javaFile ->
             var replaceText = javaFile.readText()

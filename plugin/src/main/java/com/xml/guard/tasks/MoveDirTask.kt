@@ -20,7 +20,8 @@ import javax.inject.Inject
  * Time: 19:06
  */
 open class MoveDirTask @Inject constructor(
-    private val guardExtension: GuardExtension
+    private val guardExtension: GuardExtension,
+    private val variantName: String,
 ) : DefaultTask() {
 
     init {
@@ -38,21 +39,24 @@ open class MoveDirTask @Inject constructor(
     private fun Project.moveDir(moveFile: Map<String, String>) {
         val manifestPackage = findPackage()  //查找清单文件里的package属性值
         //1、替换manifest文件 、layout/navigation目录下的文件、Java、Kt文件
-        val dirs = project.resDirs().flatMapTo(ArrayList()) { dir ->
+        val dirs = project.resDirs(variantName).flatMapTo(ArrayList()) { dir ->
             dir.listFiles { _, name ->
                 //过滤res目录下的layout、navigation目录
                 name.startsWith("layout") || name.startsWith("navigation")
             }?.toList() ?: emptyList()
         }
         dirs.add(manifestFile())
-        dirs.addAll(javaDirs())
+        val javaDirs = javaDirs(variantName)
+        dirs.addAll(javaDirs)
         files(dirs).asFileTree.forEach {
             it.replaceText(moveFile, manifestPackage)
         }
 
         // 2、开始移动目录
         moveFile.forEach { (oldPath, newPath) ->
-            for (oldDir in javaDirs(oldPath.replace(".", File.separator))) {
+            val oldPackagePath = oldPath.replace(".", File.separator)
+            for (javaDir in javaDirs) {
+                val oldDir = File(javaDir, oldPackagePath)
                 if (!oldDir.exists()) {
                     continue
                 }
