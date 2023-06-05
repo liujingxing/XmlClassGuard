@@ -3,11 +3,11 @@ package com.xml.guard.tasks
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findPackage
+import com.xml.guard.utils.findXmlDirs
 import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.replaceWords
-import com.xml.guard.utils.resDirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -39,12 +39,7 @@ open class MoveDirTask @Inject constructor(
     private fun Project.moveDir(moveFile: Map<String, String>) {
         val manifestPackage = findPackage()  //查找清单文件里的package属性值
         //1、替换manifest文件 、layout/navigation目录下的文件、Java、Kt文件
-        val dirs = project.resDirs(variantName).flatMapTo(ArrayList()) { dir ->
-            dir.listFiles { _, name ->
-                //过滤res目录下的layout、navigation目录
-                name.startsWith("layout") || name.startsWith("navigation")
-            }?.toList() ?: emptyList()
-        }
+        val dirs = findXmlDirs(variantName, "layout", "navigation", "xml")
         dirs.add(manifestFile())
         val javaDirs = javaDirs(variantName)
         dirs.addAll(javaDirs)

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.ljx.example.pre.CustomCheckBoxPreference
+        android:key="checkbox"
+        android:summary="Check it on , check it off"
+        android:title="CheckBox Preference" />
+
+    <RingtonePreference
+        android:key="ringtone"
+        android:showDefault="true"
+        android:showSilent="true"
+        android:summary="Pick a tone, any tone"
+        android:title="Ringtone Preference" />
+
+</PreferenceScreen>

@@ -57,6 +57,16 @@ fun Project.javaDirs(variantName: String): List<File> {
     return javaDirs
 }
 
+fun Project.findLayoutDirs(variantName: String) = findXmlDirs(variantName, "layout")
+fun Project.findXmlDirs(variantName: String, vararg dirName: String): ArrayList<File> {
+    return resDirs(variantName).flatMapTo(ArrayList()) { dir ->
+        dir.listFiles { file, name ->
+            //过滤res目录下xxx目录
+            file.isDirectory && dirName.any { name.startsWith(it) }
+        }?.toList() ?: emptyList()
+    }
+}
+
 //返回res目录,可能有多个
 fun Project.resDirs(variantName: String): List<File> {
     val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets

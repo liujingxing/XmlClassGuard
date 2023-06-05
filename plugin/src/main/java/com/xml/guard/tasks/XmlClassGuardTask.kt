@@ -8,12 +8,12 @@ import com.xml.guard.utils.findClassByManifest
 import com.xml.guard.utils.findClassByNavigationXml
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.findPackage
+import com.xml.guard.utils.findXmlDirs
 import com.xml.guard.utils.getDirPath
 import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.removeSuffix
 import com.xml.guard.utils.replaceWords
-import com.xml.guard.utils.resDirs
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -54,12 +54,8 @@ open class XmlClassGuardTask @Inject constructor(
 
     //处理res目录
     private fun handleResDir(project: Project) {
-        val xmlDirs = project.resDirs(variantName).flatMapTo(ArrayList()) { dir ->
-            dir.listFiles { _, name ->
-                //过滤res目录下的layout、navigation目录
-                name.startsWith("layout") || name.startsWith("navigation")
-            }?.toList() ?: emptyList()
-        }
+        //过滤res目录下的layout、navigation目录
+        val xmlDirs = project.findXmlDirs(variantName, "layout", "navigation", "xml")
         xmlDirs.add(project.manifestFile())
         project.files(xmlDirs).asFileTree.forEach { xmlFile ->
             guardXml(project, xmlFile)
@@ -75,9 +71,11 @@ open class XmlClassGuardTask @Inject constructor(
             parentName.startsWith("navigation") -> {
                 findClassByNavigationXml(xmlText, classPaths)
             }
-            parentName.startsWith("layout") -> {
+
+            listOf("layout", "xml").any { parentName.startsWith(it) } -> {
                 findClassByLayoutXml(xmlText, classPaths)
             }
+
             xmlFile.name == "AndroidManifest.xml" -> {
                 val tempPackageName = project.findPackage()
                 packageName = tempPackageName
