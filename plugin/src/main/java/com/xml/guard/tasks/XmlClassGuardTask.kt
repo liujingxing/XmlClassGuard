@@ -93,11 +93,6 @@ open class XmlClassGuardTask @Inject constructor(
             if (packageName != null && classPath.startsWith(packageName)) {
                 xmlText = xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
             }
-
-            // 内部类没有混淆，删除
-            if (mapping.isXmlInnerClass(classPath)) {
-                mapping.classMapping.remove(classPath)
-            }
         }
         xmlFile.writeText(xmlText)
     }

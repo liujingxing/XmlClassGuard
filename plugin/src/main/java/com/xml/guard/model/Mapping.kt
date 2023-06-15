@@ -93,31 +93,24 @@ class Mapping {
 
     fun isObfuscated(rawClassPath: String) = classMapping.containsValue(rawClassPath)
 
-    fun isXmlInnerClass(classPath: String): Boolean {
-        return classPath.contains("[a-zA-Z0-9_]+\\$[a-zA-Z0-9_]+".toRegex())
-    }
-
     //混淆包名+类名，返回混淆后的包名+类名
-    fun obfuscatePath(rawClassPath: String): String {
+    fun obfuscatePath(classPath: String): String {
+        var innerClassName: String? = null //内部类类名
+        val rawClassPath = if (isInnerClass(classPath)) {
+            val arr = classPath.split("$")
+            innerClassName = arr[1]
+            arr[0]
+        } else {
+            classPath
+        }
         var obfuscateClassPath = classMapping[rawClassPath]
         if (obfuscateClassPath == null) {
             val rawPackage = rawClassPath.getDirPath()
             val obfuscatePackage = obfuscatePackage(rawPackage)
-            // 内部类，如：<service android:name=".TestBroadReceiver$NotifyJobService" />
-            if (isXmlInnerClass(rawClassPath)) {
-                obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
-                val arr = rawClassPath.split("$")
-                classMapping[arr[0]] = obfuscateClassPath
-
-                // 用于清单文件中替换
-                obfuscateClassPath = "$obfuscateClassPath\$${arr[1]}"
-                classMapping[rawClassPath] = obfuscateClassPath
-            } else {
-                obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
-                classMapping[rawClassPath] = obfuscateClassPath
-            }
+            obfuscateClassPath = "$obfuscatePackage.${generateObfuscateClassName()}"
+            classMapping[rawClassPath] = obfuscateClassPath
         }
-        return obfuscateClassPath
+        return if (innerClassName != null) "$obfuscateClassPath\$$innerClassName" else obfuscateClassPath
     }
 
 
@@ -173,4 +166,7 @@ class Mapping {
         return h xor (h ushr 16)
     }
 
+    private fun isInnerClass(classPath: String): Boolean {
+        return classPath.contains("[a-zA-Z0-9_]+\\$[a-zA-Z0-9_]+".toRegex())
+    }
 }

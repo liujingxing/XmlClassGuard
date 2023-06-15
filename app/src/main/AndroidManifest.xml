@@ -20,6 +20,8 @@
         </activity>
 
         <service android:name=".TestInnerClass$NotifyJobService" />
+        <service android:name=".TestInnerClass$P0" />
+        <service android:name=".TestInnerClass$P1" />
     </application>
 
 </manifest>
