@@ -15,7 +15,7 @@ import java.io.File
  */
 
 val whiteList = arrayListOf(
-    "layout", "data", "variable", "import", "merge", "ViewStub", "include",
+    "layout", "data", "merge", "ViewStub", "include",
     "LinearLayout", "RelativeLayout", "FrameLayout", "AbsoluteLayout",
     "Button", "TextView", "View", "ImageView", "EditText", "ProgressBar",
     "androidx.constraintlayout.widget.ConstraintLayout",
@@ -134,12 +134,18 @@ fun findClassByLayoutXml(text: String, classPaths: MutableList<String>) {
     val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
-        val classPath = childNode.name().toString()
-        if (classPath !in whiteList) {
-            classPaths.add(classPath)
-            val layoutManager = childNode.attribute("app:layoutManager")?.toString()
-            if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
-                classPaths.add(layoutManager)
+        val nodeName = childNode.name().toString()
+        println("nodeName=$nodeName")
+        if (nodeName !in whiteList) {
+            if (nodeName == "variable" || nodeName == "import") {
+                val typeValue = childNode.attribute("type").toString()
+                classPaths.add(typeValue)
+            } else {
+                classPaths.add(nodeName)
+                val layoutManager = childNode.attribute("app:layoutManager")?.toString()
+                if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
+                    classPaths.add(layoutManager)
+                }
             }
         }
     }
