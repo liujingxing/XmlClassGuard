@@ -2,7 +2,7 @@
 buildscript {
     dependencies {
         classpath "com.bytedance.android:aabresguard-plugin:0.1.10"
-//        classpath "com.github.liujingxing:XmlClassGuard:$plugin_version"
+        classpath "com.github.liujingxing:XmlClassGuard:$plugin_version"
     }
 }
 
