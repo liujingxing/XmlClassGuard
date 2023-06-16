@@ -1,6 +1,7 @@
 package com.xml.guard.utils
 
 import com.android.build.gradle.BaseExtension
+import com.xml.guard.model.FragmentInfo
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
@@ -151,16 +152,18 @@ fun findClassByLayoutXml(text: String, classPaths: MutableList<String>) {
     }
 }
 
-fun findClassByNavigationXml(text: String, classPaths: MutableList<String>) {
+fun findFragmentInfoList(text: String): MutableList<FragmentInfo> {
+    val fragmentInfoList = mutableListOf<FragmentInfo>()
     val rootNode = XmlParser(false, false).parseText(text)
     for (children in rootNode.children()) {
         val childNode = children as? Node ?: continue
         val childName = childNode.name()
         if ("fragment" == childName) {
             val classPath = childNode.attribute("android:name").toString()
-            classPaths.add(classPath)
+            fragmentInfoList.add(FragmentInfo(classPath, childNode.children().isNotEmpty()))
         }
     }
+    return fragmentInfoList
 }
 
 //在manifest文件里，查找四大组件及Application，返回文件的package属性，即包名

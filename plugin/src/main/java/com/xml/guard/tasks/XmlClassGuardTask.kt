@@ -5,7 +5,7 @@ import com.xml.guard.model.MappingParser
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findClassByLayoutXml
 import com.xml.guard.utils.findClassByManifest
-import com.xml.guard.utils.findClassByNavigationXml
+import com.xml.guard.utils.findFragmentInfoList
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.findXmlDirs
@@ -36,6 +36,8 @@ open class XmlClassGuardTask @Inject constructor(
 
     private val mappingFile = guardExtension.mappingFile ?: project.file("xml-class-mapping.txt")
     private val mapping = MappingParser.parse(mappingFile)
+    private val hasNavigationPlugin = project.plugins.hasPlugin("androidx.navigation.safeargs")
+    private val fragmentDirectionList = mutableListOf<String>()
 
     @TaskAction
     fun execute() {
@@ -44,6 +46,11 @@ open class XmlClassGuardTask @Inject constructor(
         androidProjects.forEach { handleResDir(it) }
         //2、混淆文件名及文件路径，返回本次混淆的类
         val classMapping = mapping.obfuscateAllClass(project, variantName)
+        if (hasNavigationPlugin && fragmentDirectionList.isNotEmpty()) {
+            fragmentDirectionList.forEach {
+                classMapping["${it}Directions"] = "${classMapping[it]}Directions"
+            }
+        }
         //3、替换Java/kotlin文件里引用到的类
         if (classMapping.isNotEmpty()) {
             androidProjects.forEach { replaceJavaText(it, classMapping) }
@@ -69,7 +76,12 @@ open class XmlClassGuardTask @Inject constructor(
         var packageName: String? = null
         when {
             parentName.startsWith("navigation") -> {
-                findClassByNavigationXml(xmlText, classPaths)
+                findFragmentInfoList(xmlText).forEach {
+                    classPaths.add(it.fragmentClassPath)
+                    if (hasNavigationPlugin && it.hasAction) {
+                        fragmentDirectionList.add(it.fragmentClassPath)
+                    }
+                }
             }
 
             listOf("layout", "xml").any { parentName.startsWith(it) } -> {

@@ -49,7 +49,7 @@ class Mapping {
     internal var packageNameIndex = -1L
 
     //遍历文件夹下的所有直接子类，混淆文件名及移动目录
-    fun obfuscateAllClass(project: Project, variantName: String): Map<String, String> {
+    fun obfuscateAllClass(project: Project, variantName: String): MutableMap<String, String> {
         val classMapped = mutableMapOf<String, String>()
         val iterator = dirMapping.iterator()
         while (iterator.hasNext()) {

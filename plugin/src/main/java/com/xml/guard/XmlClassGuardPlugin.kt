@@ -1,6 +1,7 @@
 package com.xml.guard
 
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.model.aabResGuard
 import com.xml.guard.model.andResGuard
@@ -30,17 +31,21 @@ class XmlClassGuardPlugin : Plugin<Project> {
         val android = project.extensions.getByName("android") as AppExtension
         project.afterEvaluate {
             android.applicationVariants.all { variant ->
-                val variantName = variant.name.capitalize()
-                it.createTask("xmlClassGuard$variantName", XmlClassGuardTask::class, guardExt, variantName)
-                it.createTask("packageChange$variantName", PackageChangeTask::class, guardExt, variantName)
-                it.createTask("moveDir$variantName", MoveDirTask::class, guardExt, variantName)
-                if (guardExt.findAndConstraintReferencedIds) {
-                    it.createAndFindConstraintReferencedIdsTask(variantName)
-                }
-                if (guardExt.findAabConstraintReferencedIds) {
-                    it.createAabFindConstraintReferencedIdsTask(variantName)
-                }
+                it.createTasks(guardExt, variant)
             }
+        }
+    }
+
+    private fun Project.createTasks(guardExt: GuardExtension, variant: ApplicationVariant) {
+        val variantName = variant.name.capitalize()
+        createTask("xmlClassGuard$variantName", XmlClassGuardTask::class, guardExt, variantName)
+        createTask("packageChange$variantName", PackageChangeTask::class, guardExt, variantName)
+        createTask("moveDir$variantName", MoveDirTask::class, guardExt, variantName)
+        if (guardExt.findAndConstraintReferencedIds) {
+            createAndFindConstraintReferencedIdsTask(variantName)
+        }
+        if (guardExt.findAabConstraintReferencedIds) {
+            createAabFindConstraintReferencedIdsTask(variantName)
         }
     }
 
