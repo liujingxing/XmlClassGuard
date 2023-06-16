@@ -60,8 +60,8 @@
 # 原理
 
 `XmlClassGuard`不同于`AndResGuard(apk资源混淆)、AadResGuard(aab资源混淆)`侵入打包流程的方案，`XmlClassGuard`
-需要在打包前执行`xmlClassGuard`任务，该任务会检索`AndroidManifest.xml`及`navigation、layout`
-文件夹下的xml，找出xml文件中引用的类，如4大组件及自定义View等，更改其`包名+类名`，并将更改后的内容同步到其他文件中，说直白点，就是在打包前，在本地更改`包名+类名`
+需要在打包前执行`xmlClassGuard`任务，该任务会检索`AndroidManifest.xml`及`navigation、layout、xml`
+文件夹下的xml文件，找出xml文件中引用的类，如4大组件及自定义View等，更改其`包名+类名`，并将更改后的内容同步到其他文件中，说直白点，就是在打包前，在本地更改`包名+类名`
 
 # 警告警告⚠️
 
@@ -92,7 +92,7 @@ xmlClassGuard {
      * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AabResGuard的白名单中，
      * 是的话，要求你在XmlClassGuard前依赖AabResGuard插件，默认false
      */
-    findAabConstraintReferencedIds = true
+    findAabConstraintReferencedIds = false
 
     /*
      * 是否查找约束布局的constraint_referenced_ids属性的值，并添加到AndResGuard的白名单中，
@@ -114,13 +114,16 @@ xmlClassGuard {
 
 # 任务介绍
 
-`XmlClassGuard`插件共有4个任务，分别是`findConstraintReferencedIds`、`moveDir`、`packageChange`及`xmlClassGuard`，这4个任务之间没有任何关系，下面将一一介绍
+`XmlClassGuard`插件共有5个任务，分别是`findAabConstraintReferencedIds`、`findAndConstraintReferencedIds`、`moveDir`、`packageChange`及`xmlClassGuard`，这5个任务之间没有任何关系，下面将一一介绍
 
-## 1、findConstraintReferencedIds
+## 1、findAabConstraintReferencedIds/findAndConstraintReferencedIds
 
-该任务需要配合[AabResGuard](https://github.com/bytedance/AabResGuard)插件使用，如果你未使用AabResGuard插件，可忽略。
+`findAabConstraintReferencedIds`需配合[AabResGuard](https://github.com/bytedance/AabResGuard)插件使用，如果你未使用AabResGuard插件，可忽略。
+`findAndConstraintReferencedIds`需配合[AndResGuard](https://github.com/shwenzhang/AndResGuard)插件使用，如果你未使用AndResGuard插件，可忽略。
 
-这里简单介绍下，由于约束布局`constraint_referenced_ids`属性的值，内部是通过getIdentifier方法获取具体的id，这就要求我们把`constraint_referenced_ids`属性的值添加进`AabResGuard`的白名单中，否则打包时，id会被混淆，打包后，`constraint_referenced_ids`属性会失效，UI将出现异常。
+下面仅介绍`findAabConstraintReferencedIds`任务，`findAndConstraintReferencedIds`任务同理
+
+由于约束布局`constraint_referenced_ids`属性的值，内部是通过getIdentifier方法获取具体的id，这就要求我们把`constraint_referenced_ids`属性的值添加进`AabResGuard`的白名单中，否则打包时，id会被混淆，打包后，`constraint_referenced_ids`属性会失效，UI将出现异常。
 
 然而，项目中可能很多地方都用到`constraint_referenced_ids`属性，并且值非常多，要一个个找出来并手动添加到`AabResGuard`的白名单中，无疑是一项繁琐的工作，于是乎，`findAabConstraintReferencedIds`任务就派上用场了，它是在打包时，自动查找`constraint_referenced_ids`属性并添加进`AabResGuard`的白名单中，非常实用的功能，你仅需要在`XmlClassGurad`的配置`findAabConstraintReferencedIds`为true即可，如下：
 
