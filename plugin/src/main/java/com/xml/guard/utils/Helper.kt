@@ -9,6 +9,26 @@ import java.util.regex.Pattern
  * Time: 10:31
  */
 
+private val packageNameBlackList = hashSetOf(
+    "in", "is", "as", "if", "do", "by", "new", "try", "int", "for", "out", "var", "val", "fun",
+    "byte", "void", "this", "else", "case", "open", "enum", "true", "false", "inner", "unit",
+    "null", "char", "long", "super", "while", "break", "float", "final", "short", "const",
+    "throw", "class", "catch", "return", "static", "import", "assert", "inline", "reified",
+    "object", "sealed", "vararg", "suspend",
+    "double", "native", "extends", "switch", "public", "package", "throws", "continue",
+    "noinline", "lateinit", "internal", "companion",
+    "default", "finally", "abstract", "private", "protected", "implements", "interface",
+    "strictfp", "transient", "boolean", "volatile", "instanceof", "synchronized", "constructor"
+)
+
+private val classNameBlackList = hashSetOf("R", "BR")
+
+
+fun String.inClassNameBlackList() = this in classNameBlackList
+
+fun String.inPackageNameBlackList() = this in packageNameBlackList
+
+
 private val packagePattern = Pattern.compile("\\s*package\\s+(.*)")
 
 //插入 import xx.xx.xx.R  import xx.xx.xx.BuildConfig    语句，

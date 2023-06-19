@@ -1,5 +1,7 @@
 package com.xml.guard.model
 
+import com.xml.guard.utils.inClassNameBlackList
+import com.xml.guard.utils.inPackageNameBlackList
 import com.xml.guard.utils.to26Long
 import java.io.File
 import java.util.regex.Pattern
@@ -27,6 +29,9 @@ object MappingParser {
                 val rawName = mat.group(1).trim()
                 val obfuscateName = mat.group(2).trim()
                 if (isDir) {
+                    if (obfuscateName.inPackageNameBlackList()) {
+                        throw IllegalArgumentException("`${line.trim()}` is illegal, $obfuscateName is a keyword")
+                    }
                     mapping.dirMapping[rawName] = obfuscateName
                     if (LOWER_PATTERN.matcher(obfuscateName).matches()) {
                         val index = obfuscateName.to26Long()
@@ -40,8 +45,9 @@ object MappingParser {
                     }
                     val obfuscateClassPath = obfuscateName.substring(0, index) //混淆后的包名
                     val obfuscateClassName = obfuscateName.substring(index + 1) //混淆后的类名
-                    if ("R" == obfuscateClassName) {
-                        throw IllegalArgumentException("`$obfuscateName` is illegal, R cannot be defined as a class name")
+
+                    if (obfuscateClassName.inClassNameBlackList()) {
+                        throw IllegalArgumentException("`$obfuscateName` is illegal, It cannot be defined as a class name")
                     }
                     if (!UPPERCASE_PATTERN.matcher(obfuscateClassName).find()) {
                         //混淆的类名必须要大写

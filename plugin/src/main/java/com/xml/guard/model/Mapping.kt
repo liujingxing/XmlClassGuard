@@ -3,6 +3,8 @@ package com.xml.guard.model
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.getDirPath
+import com.xml.guard.utils.inClassNameBlackList
+import com.xml.guard.utils.inPackageNameBlackList
 import com.xml.guard.utils.insertImportXxxIfAbsent
 import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.removeSuffix
@@ -26,18 +28,6 @@ class Mapping {
         internal const val DIR_MAPPING = "dir mapping:"
         internal const val CLASS_MAPPING = "class mapping:"
     }
-
-    private val packageNameBlackList = mutableSetOf(
-        "in", "is", "as", "if", "do", "by", "new", "try", "int", "for", "out", "var", "val", "fun",
-        "byte", "void", "this", "else", "case", "open", "enum", "true", "false", "inner", "unit",
-        "null", "char", "long", "super", "while", "break", "float", "final", "short", "const",
-        "throw", "class", "catch", "return", "static", "import", "assert", "inline", "reified",
-        "object", "sealed", "vararg", "suspend",
-        "double", "native", "extends", "switch", "public", "package", "throws", "continue",
-        "noinline", "lateinit", "internal", "companion",
-        "default", "finally", "abstract", "private", "protected", "implements", "interface",
-        "strictfp", "transient", "boolean", "volatile", "instanceof", "synchronized", "constructor"
-    )
 
     internal val dirMapping = mutableMapOf<String, String>()
     internal val classMapping = mutableMapOf<String, String>()
@@ -145,25 +135,20 @@ class Mapping {
 
     //生成混淆的包名
     private fun generateObfuscatePackageName(): String {
-        var obfuscatePackage = (++packageNameIndex).toLetterStr()
-        while (obfuscatePackage in packageNameBlackList) {
-            //过滤黑名单
-            obfuscatePackage = (++packageNameIndex).toLetterStr()
+        while (true) {
+            val obfuscatePackage = (++packageNameIndex).toLetterStr()
+            if (!obfuscatePackage.inPackageNameBlackList()) //过滤黑名单
+                return obfuscatePackage
         }
-        return obfuscatePackage
     }
 
     //生成混淆的类名
     private fun generateObfuscateClassName(): String {
-        if (++classIndex == 17L) { //跳过字母 R
-            classIndex++
+        while (true) {
+            val obfuscateClassName = (++classIndex).toUpperLetterStr()
+            if (!obfuscateClassName.inClassNameBlackList()) //过滤黑名单
+                return obfuscateClassName
         }
-        return classIndex.toUpperLetterStr()
-    }
-
-    private fun hash(key: Any): Int {
-        val h = key.hashCode()
-        return h xor (h ushr 16)
     }
 
     private fun isInnerClass(classPath: String): Boolean {
