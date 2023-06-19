@@ -62,7 +62,7 @@ open class XmlClassGuardTask @Inject constructor(
 
     //处理res目录
     private fun handleResDir(project: Project) {
-        //过滤res目录下的layout、navigation目录
+        //过滤res目录下的layout、navigation、xml目录
         val xmlDirs = project.findXmlDirs(variantName, "layout", "navigation", "xml")
         xmlDirs.add(project.manifestFile())
         project.files(xmlDirs).asFileTree.forEach { xmlFile ->
