@@ -1,6 +1,7 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
+import com.xml.guard.model.ClassInfo
 import com.xml.guard.model.MappingParser
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findClassByLayoutXml
@@ -71,30 +72,31 @@ open class XmlClassGuardTask @Inject constructor(
 
     private fun guardXml(project: Project, xmlFile: File) {
         var xmlText = xmlFile.readText()
-        val classPaths = mutableListOf<String>()
+        val classInfoList = mutableListOf<ClassInfo>()
         val parentName = xmlFile.parentFile.name
         var packageName: String? = null
         when {
             parentName.startsWith("navigation") -> {
-                findFragmentInfoList(xmlText).forEach {
-                    classPaths.add(it.fragmentClassPath)
-                    if (hasNavigationPlugin && it.hasAction) {
-                        fragmentDirectionList.add(it.fragmentClassPath)
-                    }
-                }
+                findFragmentInfoList(xmlText).let { classInfoList.addAll(it) }
             }
 
             listOf("layout", "xml").any { parentName.startsWith(it) } -> {
-                findClassByLayoutXml(xmlText, classPaths)
+                findClassByLayoutXml(xmlText).let { classInfoList.addAll(it) }
             }
 
             xmlFile.name == "AndroidManifest.xml" -> {
                 val tempPackageName = project.findPackage()
                 packageName = tempPackageName
-                findClassByManifest(xmlText, classPaths, tempPackageName)
+                findClassByManifest(xmlText, tempPackageName).let { classInfoList.addAll(it) }
             }
         }
-        for (classPath in classPaths) {
+        if (hasNavigationPlugin) {
+            classInfoList.mapNotNullTo(fragmentDirectionList) {
+                if (it.hasAction) it.classPath else null
+            }
+        }
+        for (classInfo in classInfoList) {
+            val classPath = classInfo.classPath
             val dirPath = classPath.getDirPath()
             //本地不存在这个文件
             if (project.findLocationProject(dirPath, variantName) == null) continue
@@ -103,7 +105,17 @@ open class XmlClassGuardTask @Inject constructor(
             val obfuscatePath = mapping.obfuscatePath(classPath)
             xmlText = xmlText.replaceWords(classPath, obfuscatePath)
             if (packageName != null && classPath.startsWith(packageName)) {
-                xmlText = xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
+                xmlText =
+                    xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
+            }
+            if (classInfo.fromImportNode) {
+                var classStartIndex = classPath.indexOfLast { it == '.' }
+                if (classStartIndex == -1) continue
+                val rawClassName = classPath.substring(classStartIndex + 1)
+                classStartIndex = obfuscatePath.indexOfLast { it == '.' }
+                if (classStartIndex == -1) continue
+                val obfuscateClassName = obfuscatePath.substring(classStartIndex + 1)
+                xmlText = xmlText.replaceWords("${rawClassName}.", "${obfuscateClassName}.")
             }
         }
         xmlFile.writeText(xmlText)

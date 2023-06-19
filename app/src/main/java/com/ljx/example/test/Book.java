@@ -6,4 +6,8 @@ package com.ljx.example.test;
  * Time: 22:57
  */
 public class Book {
+
+    public static String getText() {
+        return "test";
+    }
 }

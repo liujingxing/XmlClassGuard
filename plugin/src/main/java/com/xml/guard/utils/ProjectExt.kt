@@ -1,7 +1,7 @@
 package com.xml.guard.utils
 
 import com.android.build.gradle.BaseExtension
-import com.xml.guard.model.FragmentInfo
+import com.xml.guard.model.ClassInfo
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
@@ -131,7 +131,8 @@ fun Project.findLocationProject(dir: String, variantName: String): Project? {
     return null
 }
 
-fun findClassByLayoutXml(text: String, classPaths: MutableList<String>) {
+fun findClassByLayoutXml(text: String): List<ClassInfo>  {
+    val classInfoList = mutableListOf<ClassInfo>()
     val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
@@ -140,41 +141,43 @@ fun findClassByLayoutXml(text: String, classPaths: MutableList<String>) {
         if (nodeName !in whiteList) {
             if (nodeName == "variable" || nodeName == "import") {
                 val typeValue = childNode.attribute("type").toString()
-                classPaths.add(typeValue)
+                classInfoList.add(ClassInfo(typeValue, fromImportNode = nodeName == "import"))
             } else {
-                classPaths.add(nodeName)
+                classInfoList.add(ClassInfo(nodeName))
                 val layoutManager = childNode.attribute("app:layoutManager")?.toString()
                 if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
-                    classPaths.add(layoutManager)
+                    classInfoList.add(ClassInfo(layoutManager))
                 }
             }
         }
     }
+    return classInfoList;
 }
 
-fun findFragmentInfoList(text: String): MutableList<FragmentInfo> {
-    val fragmentInfoList = mutableListOf<FragmentInfo>()
+fun findFragmentInfoList(text: String): List<ClassInfo> {
+    val classInfoList = mutableListOf<ClassInfo>()
     val rootNode = XmlParser(false, false).parseText(text)
     for (children in rootNode.children()) {
         val childNode = children as? Node ?: continue
         val childName = childNode.name()
         if ("fragment" == childName) {
             val classPath = childNode.attribute("android:name").toString()
-            fragmentInfoList.add(FragmentInfo(classPath, childNode.children().isNotEmpty()))
+            classInfoList.add(ClassInfo(classPath, childNode.children().isNotEmpty()))
         }
     }
-    return fragmentInfoList
+    return classInfoList
 }
 
 //在manifest文件里，查找四大组件及Application，返回文件的package属性，即包名
-fun findClassByManifest(text: String, classPaths: MutableList<String>, packageName: String) {
+fun findClassByManifest(text: String, packageName: String): List<ClassInfo> {
+    val classInfoList = mutableListOf<ClassInfo>()
     val rootNode = XmlParser(false, false).parseText(text)
-    val nodeList = rootNode.get("application") as? NodeList ?: return
-    val applicationNode = nodeList.firstOrNull() as? Node ?: return
+    val nodeList = rootNode.get("application") as? NodeList ?: return classInfoList
+    val applicationNode = nodeList.firstOrNull() as? Node ?: return classInfoList
     val application = applicationNode.attribute("android:name")?.toString()
     if (application != null) {
         val classPath = if (application.startsWith(".")) packageName + application else application
-        classPaths.add(classPath)
+        classInfoList.add(ClassInfo(classPath))
     }
     for (children in applicationNode.children()) {
         val childNode = children as? Node ?: continue
@@ -184,7 +187,8 @@ fun findClassByManifest(text: String, classPaths: MutableList<String>, packageNa
         ) {
             val name = childNode.attribute("android:name").toString()
             val classPath = if (name.startsWith(".")) packageName + name else name
-            classPaths.add(classPath)
+            classInfoList.add(ClassInfo(classPath))
         }
     }
+    return classInfoList
 }
