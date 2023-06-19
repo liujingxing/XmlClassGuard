@@ -99,12 +99,12 @@ fun String.isWord(index: Int, oldValue: String): Boolean {
     return true
 }
 
-// Int 转 大写字符串
+// Long 转 大写字符串
 fun Long.toUpperLetterStr(): String {
     return toLetterStr(true)
 }
 
-// Int 转 大/小字符串
+// Long 转 大/小字符串
 fun Long.toLetterStr(upperCase: Boolean = false): String {
     val size = 26
     val offSize = if (upperCase) 65 else 97
@@ -118,7 +118,7 @@ fun Long.toLetterStr(upperCase: Boolean = false): String {
     return sb.reverse().toString()
 }
 
-//字符串转Int, 必须是大写或小写字母, 不能是大小写混合
+//字符串转Long, 必须是大写或小写字母, 不能是大小写混合
 fun String.to26Long(): Long {
     val regexLowercase = "^[a-z]+$"
     val regexUppercase = "^[A-Z]+$"

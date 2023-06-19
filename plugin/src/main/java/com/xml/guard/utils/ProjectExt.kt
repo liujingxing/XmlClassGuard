@@ -137,7 +137,6 @@ fun findClassByLayoutXml(text: String): List<ClassInfo>  {
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
         val nodeName = childNode.name().toString()
-        println("nodeName=$nodeName")
         if (nodeName !in whiteList) {
             if (nodeName == "variable" || nodeName == "import") {
                 val typeValue = childNode.attribute("type").toString()
