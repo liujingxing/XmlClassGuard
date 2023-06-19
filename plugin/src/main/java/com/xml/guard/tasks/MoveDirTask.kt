@@ -89,6 +89,7 @@ open class MoveDirTask @Inject constructor(
                  上面代码会将将R、BuildConfig等类路径替换掉，所以这里需要还原回去
                  */
                 replaceText = replaceText.replaceWords("$newPath.R", "$oldPath.R")
+                    .replaceWords("$newPath.BR", "$oldPath.BR")
                     .replaceWords("$newPath.BuildConfig", "$oldPath.BuildConfig")
                     .replaceWords("$newPath.databinding", "$oldPath.databinding")
             }

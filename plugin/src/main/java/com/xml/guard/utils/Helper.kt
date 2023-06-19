@@ -35,13 +35,17 @@ private val packagePattern = Pattern.compile("\\s*package\\s+(.*)")
 fun File.insertImportXxxIfAbsent(newPackage: String) {
     val text = readText()
     val importR = "import $newPackage.R"
+    val importBR = "import $newPackage.BR"
     val importBuildConfig = "import $newPackage.BuildConfig"
-    //如果使用引用了R类且没有导入，则需要导入
+    //如果使用了R类但没有导入，则需要导入
     val needImportR = text.findWord("R.") != -1 && text.findWord(importR) == -1
-    //如果使用引用了BuildConfig类且没有导入，则需要导入
+    //如果使用了BR类但没有导入，则需要导入
+    val needImportBR = text.findWord("BR.") != -1 && text.findWord(importBR) == -1
+    //如果使用了BuildConfig类但没有导入，则需要导入
     val needImportBuildConfig = text.findWord("BuildConfig.") != -1 &&
             text.findWord(importBuildConfig) == -1
-    if (!needImportR && !needImportBuildConfig) return
+
+    if (!needImportR && !needImportBR && !needImportBuildConfig) return
     val builder = StringBuilder()
     val matcher = packagePattern.matcher(text)
     if (matcher.find()) {
@@ -55,6 +59,15 @@ fun File.insertImportXxxIfAbsent(newPackage: String) {
         if (needImportR) {
             //import xx.xx.xx.R
             builder.append(importR)
+            if (name.endsWith(".java")) {
+                builder.append(";")
+            }
+            builder.append("\n")
+        }
+
+        if (needImportBR) {
+            //import xx.xx.xx.BR
+            builder.append(importBR)
             if (name.endsWith(".java")) {
                 builder.append(";")
             }
