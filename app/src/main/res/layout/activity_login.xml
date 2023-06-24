@@ -9,7 +9,7 @@
             name="user"
             type="com.ljx.base.User" />
 
-        <import type="com.ljx.example.test.Book" />
+        <import type="com.ljx.example.entity.Book" />
 
     </data>
 

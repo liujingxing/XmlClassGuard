@@ -1,5 +1,6 @@
 package com.xml.guard.model
 
+import com.xml.guard.utils.KtFileParser
 import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.getDirPath
@@ -51,8 +52,8 @@ class Mapping {
                 continue
             }
             val manifestPackage = locationProject.findPackage()
-            //去除目录的直接子文件
-            val dirPath = rawDir.replace(".", File.separator)
+            //过滤目录的直接子文件
+            val dirPath = rawDir.replace(".", File.separator) //xx.xx  不带文件名
             val childFiles = locationProject.javaDirs(variantName).flatMap {
                 File(it, dirPath).listFiles { f ->
                     val filename = f.name
@@ -61,21 +62,38 @@ class Mapping {
             }
             if (childFiles.isEmpty()) continue
             for (file in childFiles) {
-                val rawClassPath = "${rawDir}.${file.name.removeSuffix()}"
+                val rawClassPath = "${rawDir}.${file.name.removeSuffix()}" //原始 xx.Xxx
                 //已经混淆
                 if (isObfuscated(rawClassPath)) continue
                 if (rawDir == manifestPackage) {
                     file.insertImportXxxIfAbsent(manifestPackage)
                 }
-                val obfuscatePath = obfuscatePath(rawClassPath)
-                val obfuscateRelativePath = obfuscatePath.replace(".", File.separator)
-                val rawRelativePath = rawClassPath.replace(".", File.separator)
+                val obfuscatePath = obfuscatePath(rawClassPath)  //混淆后 xx.Xxx
+                val obfuscateRelativePath = obfuscatePath.replace(".", File.separator) //混淆后 xx/Xxx
+                val rawRelativePath = rawClassPath.replace(".", File.separator) //原始 xx/Xxx
                 //替换原始类路径
-                val newFile = File(file.absolutePath.replace(rawRelativePath, obfuscateRelativePath))
+                val newFile =
+                    File(file.absolutePath.replace(rawRelativePath, obfuscateRelativePath))
                 if (!newFile.exists()) newFile.parentFile.mkdirs()
-                newFile.writeText(file.readText())
-                file.delete()
-                classMapped[rawClassPath] = obfuscatePath
+                if (file.renameTo(newFile)) {
+                    classMapped[rawClassPath] = obfuscatePath
+
+                    //处理顶级类、方法及变量
+                    val obfuscateDir = obfuscatePath.getDirPath()
+                    val filename = file.name.removeSuffix()
+                    val ktParser = KtFileParser(newFile, filename)
+                    val jvmName = ktParser.jvmName
+                    if (jvmName != null && jvmName != filename) {
+                        classMapped["$rawDir.$jvmName"] = "$obfuscateDir.$jvmName"
+                    } else if (jvmName == null &&
+                        (ktParser.topFunNames.isNotEmpty() || ktParser.topFieldNames.isNotEmpty())
+                    ) {
+                        classMapped["${rawClassPath}Kt"] = "${obfuscatePath}Kt"
+                    }
+                    ktParser.getTopClassOrFunOrFieldNames().forEach {
+                        classMapped["$rawDir.$it"] = "$obfuscateDir.$it"
+                    }
+                }
             }
         }
         return classMapped

@@ -1,4 +1,4 @@
-package com.ljx.example.test;
+package com.ljx.example.entity;
 
 /**
  * User: ljx

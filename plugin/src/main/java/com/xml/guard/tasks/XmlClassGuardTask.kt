@@ -7,9 +7,7 @@ import com.xml.guard.utils.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileReader
 import javax.inject.Inject
 
 /**
@@ -30,14 +28,13 @@ open class XmlClassGuardTask @Inject constructor(
     private val mapping = MappingParser.parse(mappingFile)
     private val hasNavigationPlugin = project.plugins.hasPlugin("androidx.navigation.safeargs")
     private val fragmentDirectionList = mutableListOf<String>()
-    private val topFunVarClassPath = mutableMapOf<String, String>()
 
     @TaskAction
     fun execute() {
         val androidProjects = allDependencyAndroidProjects()
         //1、遍历res下的xml文件，找到自定义的类(View/Fragment/四大组件等)，并将混淆结果同步到xml文件内
         androidProjects.forEach { handleResDir(it) }
-        //2、混淆文件名及文件路径，返回本次混淆的类
+        //2、仅修改文件名及文件路径，返回本次修改的文件
         val classMapping = mapping.obfuscateAllClass(project, variantName)
         if (hasNavigationPlugin && fragmentDirectionList.isNotEmpty()) {
             fragmentDirectionList.forEach {
@@ -47,12 +44,6 @@ open class XmlClassGuardTask @Inject constructor(
         //3、替换Java/kotlin文件里引用到的类
         if (classMapping.isNotEmpty()) {
             androidProjects.forEach { replaceJavaText(it, classMapping) }
-        }
-        findTopFunVarClass(project, classMapping)
-        if (topFunVarClassPath.isNotEmpty()) {
-            androidProjects.forEach {
-                replaceKotlinText(it)
-            }
         }
         //4、混淆映射写出到文件
         mapping.writeMappingToFile(mappingFile)
@@ -173,126 +164,6 @@ open class XmlClassGuardTask @Inject constructor(
                 }
             }
         }
-        return replaceText
-    }
-
-    private fun findTopFunVarClass(project: Project, classMapping: Map<String, String>) {
-        val javaDirs = project.javaDirs(variantName)
-
-        fun addToTopFunMap(key: String, value: String) {
-            topFunVarClassPath.putAll(mapOf(key to value))
-        }
-
-        //判断移除class文件名相同的类之后文件内容存在以下关键词
-        fun isTopKtFile(content: String): Boolean {
-            val topFileKey = listOf("typealias", "val", "var", "class")
-            topFileKey.forEach {
-                if (content.contains(it)) {
-                    return true
-                }
-            }
-            return false
-        }
-
-        project.files(javaDirs).asFileTree.forEach { javaFile ->
-            //这个是混淆过的name
-            val fileName = javaFile.name
-
-            if (!fileName.endsWith(".kt")) {
-                return@forEach
-            }
-
-            val assumeClazzName = fileName.split(".")[0]
-            val fileText = javaFile.readText()
-
-            var javaFileReader: FileReader? = null
-            var buffer: BufferedReader? = null
-            var javaFileFirstLine = ""
-            try {
-                javaFileReader = FileReader(javaFile)
-                buffer = BufferedReader(javaFileReader)
-                javaFileFirstLine = buffer.readLine().removeSuffix(";")
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            } finally {
-                buffer?.close()
-                javaFileReader?.close()
-            }
-
-            //获取文件的packagename
-            val filePackageName = javaFileFirstLine.substring(8)
-
-            //如果不存在当前文件名的class 表明这个文件存在其他的class或者顶层函数和变量
-            if (!fileText.contains("class $assumeClazzName", ignoreCase = false)) {
-                classMapping.forEach { (key, value) ->
-                    if (value == "$filePackageName.$assumeClazzName") {
-                        addToTopFunMap(key, value)
-                    }
-                }
-                return@forEach
-            }
-
-            //下面移除和文件名同名的class文件内容
-            val clazzStartIndex = fileText.indexOf("class $assumeClazzName")
-            val needSearchBracketText = fileText.substring(clazzStartIndex)
-
-            var brCounter = 0
-            var clazzEndIndex = 0
-            var charCounter = 0
-            var findIsValid = false
-            for (s in needSearchBracketText) {
-                charCounter += 1
-                if (s == '{') {
-                    findIsValid = true
-                    brCounter += 1
-                } else if (s == '}') {
-                    brCounter -= 1
-                }
-                if (brCounter == 0 && findIsValid) {
-                    clazzEndIndex = (charCounter + clazzStartIndex)
-                    break
-                }
-            }
-            val noClazzFileContent = fileText.removeRange(clazzStartIndex, clazzEndIndex)
-
-            if (isTopKtFile(noClazzFileContent)) {
-                classMapping.forEach { (key, value) ->
-                    if (value == "$filePackageName.$assumeClazzName") {
-                        addToTopFunMap(key ,value)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun replaceKotlinText(project: Project) {
-        val javaDirs = project.javaDirs(variantName)
-        //遍历所有Java\Kt文件，替换混淆后的类的引用，import及new对象的地方
-        project.files(javaDirs).asFileTree.forEach { javaFile ->
-            var replaceText = javaFile.readText()
-            topFunVarClassPath.forEach {
-                replaceText = replaceKotlinFunText(replaceText, it.key, it.value)
-            }
-            javaFile.writeText(replaceText)
-        }
-    }
-
-    private fun replaceKotlinFunText(
-        rawText: String,
-        rawFilePackagePath: String,
-        obfuscatePackagePath: String
-    ): String {
-        val rawPackage = rawFilePackagePath.removeSuffix()
-        val obfuscatePackage = obfuscatePackagePath.removeSuffix()
-        if (!rawText.contains(rawPackage)) {
-            return rawText
-        }
-        var replaceText = rawText
-        replaceText = replaceText.replace(rawPackage, obfuscatePackage)
-            .replace("$obfuscatePackage.R", "$rawPackage.R")
-            .replace("$obfuscatePackage.BR", "$rawPackage.BR")
-            .replace("$obfuscatePackage.BuildConfig", "$rawPackage.BuildConfig")
-            .replace("$obfuscatePackage.databinding", "$rawPackage.databinding")
         return replaceText
     }
 }
