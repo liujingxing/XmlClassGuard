@@ -24,8 +24,6 @@
 
 # TODO (欢迎提PR)
 
-- 支持检索res/xml目录下的文件，并混淆其用到的类
-
 - 混淆xml文件中用到的系统类，如TextView/Button等，用自定义View替代
 
 
