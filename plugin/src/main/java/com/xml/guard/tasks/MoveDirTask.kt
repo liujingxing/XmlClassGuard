@@ -63,14 +63,29 @@ open class MoveDirTask @Inject constructor(
                 }
                 val oldRelativePath = oldPath.replace(".", File.separator)
                 val newRelativePath = newPath.replace(".", File.separator)
-                val toFile = File(oldDir.absolutePath.replace(oldRelativePath, newRelativePath))
-                copy {
-                    it.from(oldDir)
-                    it.into(toFile)
+                oldDir.allFiles().forEach {
+                    val toPath = it.absolutePath.replace(
+                        "${File.separator}$oldRelativePath${File.separator}",
+                        "${File.separator}$newRelativePath${File.separator}"
+                    )
+                    val toFilename = File(toPath)
+                    if (!toFilename.exists()) toFilename.parentFile.mkdirs()
+                    it.renameTo(toFilename)
                 }
-                delete(oldDir)
             }
         }
+    }
+
+    private fun File.allFiles(): List<File> {
+        val files = mutableListOf<File>()
+        listFiles()?.forEach {
+            if (it.isDirectory) {
+                files.addAll(it.allFiles())
+            } else {
+                files.add(it)
+            }
+        }
+        return files
     }
 
     private fun File.replaceText(map: Map<String, String>, manifestPackage: String?) {
