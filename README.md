@@ -75,7 +75,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "com.github.liujingxing:XmlClassGuard:1.2.3"
+        classpath "com.github.liujingxing:XmlClassGuard:1.2.4"
     }
 }
 ```
