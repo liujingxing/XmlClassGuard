@@ -131,11 +131,23 @@ fun Project.findLocationProject(dir: String, variantName: String): Project? {
     return null
 }
 
-fun findClassByLayoutXml(text: String): List<ClassInfo>  {
+fun findClassByLayoutXml(text: String, packageName: String): List<ClassInfo> {
     val classInfoList = mutableListOf<ClassInfo>()
     val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
+        val contextValue = childNode.attribute("tools:context")?.toString()
+        if (!contextValue.isNullOrBlank()) {
+            val classname =
+                if (contextValue.startsWith(".")) "$packageName$contextValue" else contextValue
+            classInfoList.add(ClassInfo(classname))
+        }
+        val layoutManager = childNode.attribute("app:layoutManager")?.toString()
+        if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
+            val classname =
+                if (layoutManager.startsWith(".")) "$packageName$layoutManager" else layoutManager
+            classInfoList.add(ClassInfo(classname))
+        }
         val nodeName = childNode.name().toString()
         if (nodeName !in whiteList) {
             if (nodeName == "variable" || nodeName == "import") {
@@ -143,14 +155,10 @@ fun findClassByLayoutXml(text: String): List<ClassInfo>  {
                 classInfoList.add(ClassInfo(typeValue, fromImportNode = nodeName == "import"))
             } else {
                 classInfoList.add(ClassInfo(nodeName))
-                val layoutManager = childNode.attribute("app:layoutManager")?.toString()
-                if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
-                    classInfoList.add(ClassInfo(layoutManager))
-                }
             }
         }
     }
-    return classInfoList;
+    return classInfoList
 }
 
 fun findFragmentInfoList(text: String): List<ClassInfo> {
@@ -175,7 +183,7 @@ fun findClassByManifest(text: String, packageName: String): List<ClassInfo> {
     val applicationNode = nodeList.firstOrNull() as? Node ?: return classInfoList
     val application = applicationNode.attribute("android:name")?.toString()
     if (application != null) {
-        val classPath = if (application.startsWith(".")) packageName + application else application
+        val classPath = if (application.startsWith(".")) "$packageName$application" else application
         classInfoList.add(ClassInfo(classPath))
     }
     for (children in applicationNode.children()) {
@@ -185,7 +193,7 @@ fun findClassByManifest(text: String, packageName: String): List<ClassInfo> {
             "receiver" == childName || "provider" == childName
         ) {
             val name = childNode.attribute("android:name").toString()
-            val classPath = if (name.startsWith(".")) packageName + name else name
+            val classPath = if (name.startsWith(".")) "$packageName$name" else name
             classInfoList.add(ClassInfo(classPath))
         }
     }

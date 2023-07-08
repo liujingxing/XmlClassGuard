@@ -3,7 +3,18 @@ package com.xml.guard.tasks
 import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.model.ClassInfo
 import com.xml.guard.model.MappingParser
-import com.xml.guard.utils.*
+import com.xml.guard.utils.allDependencyAndroidProjects
+import com.xml.guard.utils.findClassByLayoutXml
+import com.xml.guard.utils.findClassByManifest
+import com.xml.guard.utils.findFragmentInfoList
+import com.xml.guard.utils.findLocationProject
+import com.xml.guard.utils.findPackage
+import com.xml.guard.utils.findXmlDirs
+import com.xml.guard.utils.getDirPath
+import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.manifestFile
+import com.xml.guard.utils.removeSuffix
+import com.xml.guard.utils.replaceWords
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -51,32 +62,30 @@ open class XmlClassGuardTask @Inject constructor(
 
     //处理res目录
     private fun handleResDir(project: Project) {
+        val packageName = project.findPackage()
         //过滤res目录下的layout、navigation、xml目录
         val xmlDirs = project.findXmlDirs(variantName, "layout", "navigation", "xml")
         xmlDirs.add(project.manifestFile())
         project.files(xmlDirs).asFileTree.forEach { xmlFile ->
-            guardXml(project, xmlFile)
+            guardXml(project, xmlFile, packageName)
         }
     }
 
-    private fun guardXml(project: Project, xmlFile: File) {
+    private fun guardXml(project: Project, xmlFile: File, packageName: String) {
         var xmlText = xmlFile.readText()
         val classInfoList = mutableListOf<ClassInfo>()
         val parentName = xmlFile.parentFile.name
-        var packageName: String? = null
         when {
             parentName.startsWith("navigation") -> {
                 findFragmentInfoList(xmlText).let { classInfoList.addAll(it) }
             }
 
             listOf("layout", "xml").any { parentName.startsWith(it) } -> {
-                findClassByLayoutXml(xmlText).let { classInfoList.addAll(it) }
+                findClassByLayoutXml(xmlText, packageName).let { classInfoList.addAll(it) }
             }
 
             xmlFile.name == "AndroidManifest.xml" -> {
-                val tempPackageName = project.findPackage()
-                packageName = tempPackageName
-                findClassByManifest(xmlText, tempPackageName).let { classInfoList.addAll(it) }
+                findClassByManifest(xmlText, packageName).let { classInfoList.addAll(it) }
             }
         }
         if (hasNavigationPlugin) {
@@ -93,7 +102,7 @@ open class XmlClassGuardTask @Inject constructor(
             if (mapping.isObfuscated(classPath)) continue
             val obfuscatePath = mapping.obfuscatePath(classPath)
             xmlText = xmlText.replaceWords(classPath, obfuscatePath)
-            if (packageName != null && classPath.startsWith(packageName)) {
+            if (classPath.startsWith(packageName)) {
                 xmlText =
                     xmlText.replaceWords(classPath.substring(packageName.length), obfuscatePath)
             }
