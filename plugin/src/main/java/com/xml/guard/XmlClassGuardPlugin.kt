@@ -1,5 +1,8 @@
 package com.xml.guard
 
+import com.android.build.api.instrumentation.FramesComputationMode
+import com.android.build.api.instrumentation.InstrumentationScope
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.api.ApplicationVariant
 import com.xml.guard.entensions.GuardExtension
@@ -9,6 +12,7 @@ import com.xml.guard.tasks.FindConstraintReferencedIdsTask
 import com.xml.guard.tasks.MoveDirTask
 import com.xml.guard.tasks.PackageChangeTask
 import com.xml.guard.tasks.XmlClassGuardTask
+import com.xml.guard.transform.StringFogTransform
 import com.xml.guard.utils.AgpVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -33,6 +37,17 @@ class XmlClassGuardPlugin : Plugin<Project> {
             android.applicationVariants.all { variant ->
                 it.createTasks(guardExt, variant)
             }
+        }
+
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants {  variant ->
+            variant.instrumentation.transformClassesWith(
+                StringFogTransform::class.java,
+                InstrumentationScope.ALL) {
+            }
+            variant.instrumentation.setAsmFramesComputationMode(
+                FramesComputationMode.COPY_FRAMES
+            )
         }
     }
 
