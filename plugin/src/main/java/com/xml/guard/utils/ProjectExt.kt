@@ -142,6 +142,11 @@ fun findClassByLayoutXml(text: String, packageName: String): List<ClassInfo> {
                 if (contextValue.startsWith(".")) "$packageName$contextValue" else contextValue
             classInfoList.add(ClassInfo(classname))
         }
+        val behavior = childNode.attribute("app:layout_behavior")?.toString()
+        if (behavior != null) {
+            val classname = if (behavior.startsWith(".")) "$packageName$behavior" else behavior
+            classInfoList.add(ClassInfo(classname))
+        }
         val layoutManager = childNode.attribute("app:layoutManager")?.toString()
         if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
             val classname =
