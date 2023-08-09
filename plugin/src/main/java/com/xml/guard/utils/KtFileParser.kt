@@ -26,18 +26,22 @@ class KtFileParser(file: File, filename: String) {
 
     init {
         if (file.name.endsWith("kt")) {
-            var content = file.readText()
-            val matcher = jvmFileNamePattern.matcher(content)
-            if (matcher.find()) {
-                jvmName = matcher.group(1).trim()
-            }
-            content = content.removeAllDocsAndComments()
-            content = content.removeAllBody()
+            try {
+                var content = file.readText()
+                val matcher = jvmFileNamePattern.matcher(content)
+                if (matcher.find()) {
+                    jvmName = matcher.group(1).trim()
+                }
+                content = content.removeAllDocsAndComments()
+                content = content.removeAllBody()
 
-            topClassNames.addAll(content.findClassNames())
-            topFunNames.addAll(content.findFunNames())
-            topFieldNames.addAll(content.findFieldNames())
-            topClassNames.remove(filename)
+                topClassNames.addAll(content.findClassNames())
+                topFunNames.addAll(content.findFunNames())
+                topFieldNames.addAll(content.findFieldNames())
+                topClassNames.remove(filename)
+            } catch (t: Throwable) {
+                throw IllegalArgumentException("$file parser fail", t)
+            }
         }
     }
 
