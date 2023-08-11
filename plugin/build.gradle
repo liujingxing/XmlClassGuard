@@ -28,6 +28,8 @@ dependencies {
     compileOnly 'com.android.tools.build:gradle:8.0.2'
     compileOnly "com.bytedance.android:aabresguard-plugin:0.1.10"
     compileOnly 'com.tencent.mm:AndResGuard-gradle-plugin:1.2.21'
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
 sourceCompatibility = "$jdk_version"
