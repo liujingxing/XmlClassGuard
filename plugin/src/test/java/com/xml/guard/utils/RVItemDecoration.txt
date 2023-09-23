@@ -1,0 +1,49 @@
+package com.xml.guard.utils
+
+/**
+ * User: ljx
+ * Date: 2023/8/11
+ * Time: 16:44
+ */
+
+import android.graphics.Rect
+import android.view.View
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
+class RVItemDecoration(
+    private var spacing: Int,
+) : RecyclerView.ItemDecoration() {
+
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        val layoutManager = parent.layoutManager
+        val lastPosition = state.itemCount - 1
+        val position = parent.getChildLayoutPosition(view)
+
+        if (position == -1) return;//holder出现异常时，可能为-1
+        if (layoutManager is LinearLayoutManager && !(layoutManager is GridLayoutManager)) {//LinearLayoutManager
+//            if (orientation == LinearLayoutManager.VERTICAL) {//垂直
+//                outRect.set(0, 0, 0, decoration);
+//                if (current == lastPosition) {//判断是否为最后一个item
+//                    outRect.set(0, 0, 0, 0);
+//                } else {
+//                    outRect.set(0, 0, 0, decoration);
+//                }
+//            } else {//水平
+//                if (position == lastPosition) {//判断是否为最后一个item
+//                    outRect.set(spacing, 0, spacing, 0);
+//                } else {
+            if (position == lastPosition) {
+                outRect.set(0, 0, 0, 0)
+            } else {
+                outRect.set(0, 0, spacing, 0);
+            }
+        }
+    }
+}

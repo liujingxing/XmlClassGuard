@@ -58,6 +58,24 @@ fun Project.javaDirs(variantName: String): List<File> {
     return javaDirs
 }
 
+fun Project.aidlDirs(variantName: String): List<File> {
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val nameSet = mutableSetOf<String>()
+    nameSet.add("main")
+    if (isAndroidProject()) {
+        nameSet.addAll(variantName.splitWords())
+    }
+    val javaDirs = mutableListOf<File>()
+    sourceSet.names.forEach { name ->
+        if (nameSet.contains(name)) {
+            sourceSet.getByName(name).aidl.srcDirs.mapNotNullTo(javaDirs) {
+                if (it.exists()) it else null
+            }
+        }
+    }
+    return javaDirs
+}
+
 fun Project.findLayoutDirs(variantName: String) = findXmlDirs(variantName, "layout")
 fun Project.findXmlDirs(variantName: String, vararg dirName: String): ArrayList<File> {
     return resDirs(variantName).flatMapTo(ArrayList()) { dir ->
@@ -134,24 +152,17 @@ fun Project.findLocationProject(dir: String, variantName: String): Project? {
 fun findClassByLayoutXml(text: String, packageName: String): List<ClassInfo> {
     val classInfoList = mutableListOf<ClassInfo>()
     val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
+    val destAttributes =
+        mutableListOf("tools:context", "app:layout_behavior", "app:layoutManager", "android:name")
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
-        val contextValue = childNode.attribute("tools:context")?.toString()
-        if (!contextValue.isNullOrBlank()) {
-            val classname =
-                if (contextValue.startsWith(".")) "$packageName$contextValue" else contextValue
-            classInfoList.add(ClassInfo(classname))
-        }
-        val behavior = childNode.attribute("app:layout_behavior")?.toString()
-        if (behavior != null) {
-            val classname = if (behavior.startsWith(".")) "$packageName$behavior" else behavior
-            classInfoList.add(ClassInfo(classname))
-        }
-        val layoutManager = childNode.attribute("app:layoutManager")?.toString()
-        if (layoutManager != null && !layoutManager.startsWith("androidx.recyclerview.widget.")) {
-            val classname =
-                if (layoutManager.startsWith(".")) "$packageName$layoutManager" else layoutManager
-            classInfoList.add(ClassInfo(classname))
+        destAttributes.forEach { attributeName ->
+            val attributeValue = childNode.attribute(attributeName)?.toString()
+            if (!attributeValue.isNullOrBlank()) {
+                val classname =
+                    if (attributeValue.startsWith(".")) "$packageName$attributeValue" else attributeValue
+                classInfoList.add(ClassInfo(classname))
+            }
         }
         val nodeName = childNode.name().toString()
         if (nodeName !in whiteList) {

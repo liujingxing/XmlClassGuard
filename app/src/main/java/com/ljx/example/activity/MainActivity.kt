@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.ljx.example.IMyAidlInterface
 import com.ljx.example.KtTopTest1
 import com.ljx.example.R
 import com.ljx.example.Test
@@ -15,6 +16,8 @@ import com.ljx.example.m
 import com.ljx.example.toB
 
 class MainActivity : AppCompatActivity() {
+
+    val list = mutableListOf<IMyAidlInterface>()
 
     private val s = "test field"
 

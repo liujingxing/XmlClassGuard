@@ -1,6 +1,7 @@
 package com.xml.guard.tasks
 
 import com.xml.guard.entensions.GuardExtension
+import com.xml.guard.utils.aidlDirs
 import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.findXmlDirs
@@ -41,8 +42,13 @@ open class MoveDirTask @Inject constructor(
         //1、替换manifest文件 、layout、navigation、xml目录下的文件、Java、Kt文件
         val dirs = findXmlDirs(variantName, "layout", "navigation", "xml")
         dirs.add(manifestFile())
+        val aidlDirs = aidlDirs(variantName)
+        dirs.addAll(aidlDirs)
         val javaDirs = javaDirs(variantName)
         dirs.addAll(javaDirs)
+        val moveDirs = mutableListOf<File>()
+        moveDirs.addAll(aidlDirs)
+        moveDirs.addAll(javaDirs)
         files(dirs).asFileTree.forEach {
             it.replaceText(moveFile, manifestPackage)
         }
@@ -50,7 +56,7 @@ open class MoveDirTask @Inject constructor(
         // 2、开始移动目录
         moveFile.forEach { (oldPath, newPath) ->
             val oldPackagePath = oldPath.replace(".", File.separator)
-            for (javaDir in javaDirs) {
+            for (javaDir in moveDirs) {
                 val oldDir = File(javaDir, oldPackagePath)
                 if (!oldDir.exists()) {
                     continue
