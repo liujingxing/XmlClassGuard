@@ -58,6 +58,24 @@ fun Project.javaDirs(variantName: String): List<File> {
     return javaDirs
 }
 
+fun Project.aidlDirs(variantName: String): List<File> {
+    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val nameSet = mutableSetOf<String>()
+    nameSet.add("main")
+    if (isAndroidProject()) {
+        nameSet.addAll(variantName.splitWords())
+    }
+    val javaDirs = mutableListOf<File>()
+    sourceSet.names.forEach { name ->
+        if (nameSet.contains(name)) {
+            sourceSet.getByName(name).aidl.srcDirs.mapNotNullTo(javaDirs) {
+                if (it.exists()) it else null
+            }
+        }
+    }
+    return javaDirs
+}
+
 fun Project.findLayoutDirs(variantName: String) = findXmlDirs(variantName, "layout")
 fun Project.findXmlDirs(variantName: String, vararg dirName: String): ArrayList<File> {
     return resDirs(variantName).flatMapTo(ArrayList()) { dir ->
