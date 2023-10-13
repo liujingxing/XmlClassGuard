@@ -78,6 +78,7 @@ open class PackageChangeTask @Inject constructor(
     private fun File.modifyBuildGradleFile(oldPackage: String, newPackage: String) {
         readText()
             .replace("namespace\\s+['\"]${oldPackage}['\"]".toRegex(), "namespace '$newPackage'")
+            .replace("namespace\\s*=\\s*['\"]${oldPackage}['\"]".toRegex(), """namespace = "$newPackage"""")
             .let { writeText(it) }
     }
 
