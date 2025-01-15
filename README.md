@@ -25,6 +25,12 @@
 
 - `XmlClassGuard`最主要的功能是混淆xml文件用到的类，故取名为`XmlClassGuard`,与[AndResGuard](https://github.com/shwenzhang/AndResGuard)、[AabResGuard](https://github.com/bytedance/AabResGuard)对应
 
+- `findDuplicateFile`功能,这个功能和其他功能不冲突,只是做一个补充.此任务不做任何代码修改,只扫描相同名字的类.
+在使用xmlClassGuard任务混淆代码后,可能存在这样的问题.
+例如你的代码中有/data/Book.java和/app/test/Book.java甚至多个目录下存在相同文件
+名字,当混淆之后,存在导包混乱情况,在使用/app/test/Book.java的类可能导入了
+data/Book.java的类. 在执行xmlClassGuard之前检测一次相同类名的类,自己进行重命名唯一的类
+可以避免上述问题.
 
 # 有什么用？
 

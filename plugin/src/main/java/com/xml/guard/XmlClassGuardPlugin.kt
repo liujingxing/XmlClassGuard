@@ -6,6 +6,7 @@ import com.xml.guard.entensions.GuardExtension
 import com.xml.guard.model.aabResGuard
 import com.xml.guard.model.andResGuard
 import com.xml.guard.tasks.FindConstraintReferencedIdsTask
+import com.xml.guard.tasks.FindDuplicateFileTask
 import com.xml.guard.tasks.MoveDirTask
 import com.xml.guard.tasks.PackageChangeTask
 import com.xml.guard.tasks.XmlClassGuardTask
@@ -52,6 +53,7 @@ class XmlClassGuardPlugin : Plugin<Project> {
         createTask("xmlClassGuard$variantName", XmlClassGuardTask::class, guardExt, variantName)
         createTask("packageChange$variantName", PackageChangeTask::class, guardExt, variantName)
         createTask("moveDir$variantName", MoveDirTask::class, guardExt, variantName)
+        createTask("findDuplicateFile$variantName", FindDuplicateFileTask::class, guardExt, variantName)
         if (guardExt.findAndConstraintReferencedIds) {
             createAndFindConstraintReferencedIdsTask(variantName)
         }
