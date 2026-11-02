@@ -111,7 +111,7 @@ fun Long.toLetterStr(upperCase: Boolean = false): String {
     val sb = StringBuilder()
     var num = this
     do {
-        val char = (num % size + offSize).toChar()
+        val char = (num % size + offSize).toInt().toChar()
         sb.append(char)
         num /= size
     } while (num > 0)

@@ -6,7 +6,7 @@ import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
 import org.gradle.api.Project
-import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependency
+import org.gradle.api.artifacts.ProjectDependency
 import java.io.File
 
 /**
@@ -119,9 +119,9 @@ fun Project.findDependencyAndroidProject(
 ) {
     names.forEach { name ->
         val dependencyProjects = configurations.getByName(name).dependencies
-            .filterIsInstance<DefaultProjectDependency>()
-            .filter { it.dependencyProject.isAndroidProject() }
-            .map { it.dependencyProject }
+            .filterIsInstance<ProjectDependency>()
+            .mapNotNull { rootProject.findProject(it.path) }
+            .filter { it.isAndroidProject() }
         projects.addAll(dependencyProjects)
         dependencyProjects.forEach {
             it.findDependencyAndroidProject(projects, mutableListOf("api"))

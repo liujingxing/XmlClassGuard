@@ -1,12 +1,15 @@
-apply plugin: "com.bytedance.android.aabResGuard"
+import org.gradle.kotlin.dsl.withGroovyBuilder
 
-aabResGuard {
-    mappingFile = file("mapping.txt").toPath() // 用于增量混淆的 mapping 文件
+apply(plugin = "com.bytedance.android.aabResGuard")
+
+
+extensions.getByName("aabResGuard").withGroovyBuilder {
+    setProperty("mappingFile", file("mapping.txt").toPath()) // 用于增量混淆的 mapping 文件
     // 白名单规则
-    whiteList = [
+    setProperty("whiteList", listOf(
             "*.R.raw.*"
-    ]
-    obfuscatedBundleFileName = "duplicated-app.aab" // 混淆后的文件名称，必须以 `.aab` 结尾
+    ))
+    setProperty("obfuscatedBundleFileName", "duplicated-app.aab") // 混淆后的文件名称，必须以 `.aab` 结尾
 //    mergeDuplicatedRes = false // 是否允许去除重复资源
 //    enableFilterFiles = false // 是否允许过滤文件
 //    // 文件过滤规则
