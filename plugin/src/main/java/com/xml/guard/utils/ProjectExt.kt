@@ -1,6 +1,7 @@
 package com.xml.guard.utils
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.CommonExtension
+import com.android.builder.model.SourceProvider
 import com.xml.guard.model.ClassInfo
 import groovy.util.Node
 import groovy.util.NodeList
@@ -30,7 +31,7 @@ val whiteList = arrayListOf(
 
 fun Project.findPackage(): String {
     if (AgpVersion.versionCompare("4.2.0") >= 0) {
-        val namespace = (extensions.getByName("android") as BaseExtension).namespace
+        val namespace = extensions.getByType(CommonExtension::class.java).namespace
         if (namespace != null) {
             return namespace
         }
@@ -41,7 +42,7 @@ fun Project.findPackage(): String {
 
 //返回java/kotlin代码目录,可能有多个
 fun Project.javaDirs(variantName: String): List<File> {
-    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
     if (isAndroidProject()) {
@@ -50,8 +51,8 @@ fun Project.javaDirs(variantName: String): List<File> {
     val javaDirs = mutableListOf<File>()
     sourceSet.names.forEach { name ->
         if (nameSet.contains(name)) {
-            sourceSet.getByName(name).java.srcDirs.mapNotNullTo(javaDirs) {
-                if (it.exists()) it else null
+            (sourceSet.getByName(name).java.directories + sourceSet.getByName(name).kotlin.directories).mapNotNullTo(javaDirs) {
+                file(it).takeIf { source -> source.exists() }
             }
         }
     }
@@ -59,7 +60,7 @@ fun Project.javaDirs(variantName: String): List<File> {
 }
 
 fun Project.aidlDirs(variantName: String): List<File> {
-    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
     if (isAndroidProject()) {
@@ -68,8 +69,8 @@ fun Project.aidlDirs(variantName: String): List<File> {
     val javaDirs = mutableListOf<File>()
     sourceSet.names.forEach { name ->
         if (nameSet.contains(name)) {
-            sourceSet.getByName(name).aidl.srcDirs.mapNotNullTo(javaDirs) {
-                if (it.exists()) it else null
+            sourceSet.getByName(name).aidl.directories.mapNotNullTo(javaDirs) {
+                file(it).takeIf { source -> source.exists() }
             }
         }
     }
@@ -88,7 +89,7 @@ fun Project.findXmlDirs(variantName: String, vararg dirName: String): ArrayList<
 
 //返回res目录,可能有多个
 fun Project.resDirs(variantName: String): List<File> {
-    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
+    val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
     if (isAndroidProject()) {
@@ -97,20 +98,21 @@ fun Project.resDirs(variantName: String): List<File> {
     val resDirs = mutableListOf<File>()
     sourceSet.names.forEach { name ->
         if (nameSet.contains(name)) {
-            sourceSet.getByName(name).res.srcDirs.mapNotNullTo(resDirs) {
-                if (it.exists()) it else null
+            sourceSet.getByName(name).res.directories.mapNotNullTo(resDirs) {
+                file(it).takeIf { source -> source.exists() }
             }
         }
     }
     return resDirs
 }
 
-//返回manifest文件目录,有且仅有一个
+// Read the main source set directly, independently of variants and added manifests.
 fun Project.manifestFile(): File {
-    val sourceSet = (extensions.getByName("android") as BaseExtension).sourceSets
-    return sourceSet.getByName("main").manifest.srcFile
+    val main = extensions.getByType(CommonExtension::class.java).sourceSets.getByName("main")
+    val sourceProvider = main as? SourceProvider
+        ?: error("Cannot read the main Manifest for $path: unsupported source set ${main.javaClass.name}")
+    return sourceProvider.manifestFile
 }
-
 
 //查找依赖的Android Project，也就是子 module，包括间接依赖的子 module
 fun Project.findDependencyAndroidProject(

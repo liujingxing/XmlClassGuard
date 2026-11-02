@@ -1,0 +1,9 @@
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+rootProject.name = 'manifest-source-regression'
+include ':lib', ':first', ':second'
+enableFeaturePreview('TYPESAFE_PROJECT_ACCESSORS')
+dependencyResolutionManagement {
+    repositories { google(); mavenCentral() }
+}

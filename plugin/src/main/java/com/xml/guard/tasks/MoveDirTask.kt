@@ -50,7 +50,7 @@ open class MoveDirTask @Inject constructor(
         moveDirs.addAll(aidlDirs)
         moveDirs.addAll(javaDirs)
         files(dirs).asFileTree.forEach {
-            it.replaceText(moveFile, manifestPackage)
+            it.replaceText(moveFile, manifestPackage, it == manifestFile())
         }
 
         // 2、开始移动目录
@@ -94,11 +94,11 @@ open class MoveDirTask @Inject constructor(
         return files
     }
 
-    private fun File.replaceText(map: Map<String, String>, manifestPackage: String?) {
+    private fun File.replaceText(map: Map<String, String>, manifestPackage: String?, isManifest: Boolean) {
         var replaceText = readText()
         map.forEach { (oldPath, newPath) ->
             replaceText =
-                if (name == "AndroidManifest.xml" && oldPath == manifestPackage) {
+                if (isManifest && oldPath == manifestPackage) {
                     replaceText.replaceWords("$oldPath.", "$newPath.")
                         .replaceWords("""android:name=".""", """android:name="${newPath}.""")
                 } else {

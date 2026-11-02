@@ -37,7 +37,8 @@ open class XmlClassGuardTask @Inject constructor(
 
     private val mappingFile = guardExtension.mappingFile ?: project.file("xml-class-mapping.txt")
     private val mapping = MappingParser.parse(mappingFile)
-    private val hasNavigationPlugin = project.plugins.hasPlugin("androidx.navigation.safeargs")
+    private val hasNavigationPlugin = project.plugins.hasPlugin("androidx.navigation.safeargs") ||
+        project.plugins.hasPlugin("androidx.navigation.safeargs.kotlin")
     private val fragmentDirectionList = mutableListOf<String>()
 
     @TaskAction
@@ -76,16 +77,16 @@ open class XmlClassGuardTask @Inject constructor(
         val classInfoList = mutableListOf<ClassInfo>()
         val parentName = xmlFile.parentFile.name
         when {
+
+            xmlFile == project.manifestFile() -> {
+                findClassByManifest(xmlText, packageName).let { classInfoList.addAll(it) }
+            }
             parentName.startsWith("navigation") -> {
                 findFragmentInfoList(xmlText).let { classInfoList.addAll(it) }
             }
 
             listOf("layout", "xml").any { parentName.startsWith(it) } -> {
                 findClassByLayoutXml(xmlText, packageName).let { classInfoList.addAll(it) }
-            }
-
-            xmlFile.name == "AndroidManifest.xml" -> {
-                findClassByManifest(xmlText, packageName).let { classInfoList.addAll(it) }
             }
         }
         if (hasNavigationPlugin) {

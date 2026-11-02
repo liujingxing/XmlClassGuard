@@ -1,17 +1,25 @@
 package com.xml.guard.utils
 
+import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
 
-/**
- * User: ljx
- * Date: 2023/8/11
- * Time: 16:46
- */
 class KtFileParserTest {
+    @get:Rule
+    val temporaryFolder = TemporaryFolder()
 
     @Test
     fun getTopClassOrFunOrFieldNames() {
-        KtFileParser(File("/src/main/test/com/xml/guard/utils/RVItemDecoration.txt"),"RVItemDecoration")
+        val source = temporaryFolder.newFile("Example.kt")
+        source.writeText("""
+            package sample
+            class Example { fun member() {} }
+            class Helper {}
+            fun topLevel() {}
+            val answer: Int = 42
+        """.trimIndent())
+        val parser = KtFileParser(source, "Example")
+        assertEquals(setOf("Helper", "topLevel", "answer"), parser.getTopClassOrFunOrFieldNames().toSet())
     }
 }

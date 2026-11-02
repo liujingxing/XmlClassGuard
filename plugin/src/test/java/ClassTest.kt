@@ -3,7 +3,8 @@ import org.junit.Test
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import java.io.File
+import org.junit.Assert.assertEquals
+import org.objectweb.asm.ClassReader
 
 /**
  * User: ljx
@@ -31,13 +32,13 @@ class ClassTest {
         )
         writer.visitEnd()
         val classBytes = writer.toByteArray()
-        File("TestData.class").writeBytes(classBytes)
+        assertEquals("com/example/test/TestData", ClassReader(classBytes).className)
     }
 
     @Test
     fun test1() {
         val myClassWriter = MyClassWriter()
         myClassWriter.generateClass()
-        File("DynamicClass.class").writeBytes(myClassWriter.toByteArray())
+        assertEquals("com/example/DynamicClass", ClassReader(myClassWriter.toByteArray()).className)
     }
 }

@@ -15,3 +15,6 @@
 local.properties
 /plugin/.idea/
 /.idea/
+
+# Generated integration fixture output
+/plugin/src/test/fixtures/**/build/
