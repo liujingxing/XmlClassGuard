@@ -26,7 +26,7 @@ XmlClassGuard 是 Android Gradle 插件，在打包前修改 XML 引用的类名
 - 需要单元测试时运行 `./gradlew :plugin:test`；现有解析测试含绝对路径，ASM 测试会写出类文件，执行前检查测试行为。
 - 涉及示例集成时运行 `./gradlew :app:assembleDebug :base:assembleDebug :kts_test:assembleDebug`，需具备相应 Android SDK 和 JDK。
 - 版本以 `build.gradle.kts`、`gradle.properties` 与 Wrapper 配置为准；JVM 字节码目标与运行 Gradle 的 JDK 是不同配置。
-- 当前构建脚本仍有旧 DSL 和独立的插件编译依赖版本；不要仅凭版本号判断迁移成功，应以实际构建结果为准。
+- 当前使用 AGP 9.5.0 新 DSL 与 Variant API，插件编译目标为 Java 17；AGP 构建插件和插件编译依赖共用版本目录中的 agp。
 - 无法完成验证时，准确报告执行命令、失败原因及未验证范围。
 
 ## 会修改源码的任务

@@ -8,7 +8,7 @@ plugins {
 val jdkVersion = providers.gradleProperty("jdk_version").get()
 val pluginVersion = providers.gradleProperty("plugin_version").get()
 
-val copyJavaTemplates by tasks.registering(Copy::class) {
+val copyJavaTemplates = tasks.register<Copy>("copyJavaTemplates") {
     from("src/main/java-templates")
     into(layout.buildDirectory.dir("generated/sources/java-templates/java/main"))
     expand("projectVersion" to pluginVersion)
@@ -44,6 +44,7 @@ dependencies {
     compileOnly(libs.aabresguard)
     compileOnly(libs.andresguard)
     testImplementation(libs.junit)
+    testImplementation(libs.asm)
 }
 
 publishing {

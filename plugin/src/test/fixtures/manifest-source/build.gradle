@@ -1,0 +1,43 @@
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.5.0'
+        classpath files(providers.gradleProperty('guardPluginJar').get())
+    }
+}
+
+// This fixture only reads source paths; it never executes source-rewriting tasks.
+tasks.register('verifyManifestSources') {
+    doLast {
+        [':lib', ':first', ':second'].each { path ->
+            def target = project(path)
+            def actual = com.xml.guard.utils.ProjectExtKt.manifestFile(target)
+            assert actual == target.file('custom/main.xml') : "Wrong main manifest for $path: $actual"
+            assert actual.isFile()
+        }
+        [':first', ':second'].each { path ->
+            def target = project(path)
+            ['xmlClassGuardDebug', 'xmlClassGuardRelease', 'packageChangeDebug', 'moveDirDebug'].each {
+                assert target.tasks.names.contains(it)
+            }
+        }
+        def modules = []
+        com.xml.guard.utils.ProjectExtKt.findDependencyAndroidProject(project(':first'), modules, ['api', 'implementation'])
+        assert modules*.path == [':lib']
+        println 'PASS: evaluated library, two applications, custom main manifests, and added variant manifests'
+    }
+}
+
+tasks.register('verifyResourceTaskDependencies') {
+    doLast {
+        def app = project(':first')
+        ['Debug', 'Release'].each { variant ->
+            ['resguard': 'andFindConstraintReferencedIds',
+             'aabresguard': 'aabFindConstraintReferencedIds'].each { external, scanner ->
+                def task = app.tasks.named("${external}${variant}").get()
+                assert task.taskDependencies.getDependencies(task)*.name.contains("${scanner}${variant}".toString())
+            }
+        }
+        println 'PASS: late AndResGuard and AabResGuard task dependencies for Debug and Release'
+    }
+}

@@ -44,11 +44,11 @@ open class PackageChangeTask @Inject constructor(
         dirs.add(buildFile)
         //1、修改layout文件、AndroidManifest文件、build.gradle文件
         files(dirs).asFileTree.forEach { file ->
-            when (file.name) {
+            when (file) {
                 //修改AndroidManifest.xml文件
-                "AndroidManifest.xml" -> file.modifyManifestFile(oldPackage, newPackage)
+                manifestFile() -> file.modifyManifestFile(oldPackage, newPackage)
                 //修改 build.gradle namespace
-                buildFile.name -> file.modifyBuildGradleFile(oldPackage, newPackage)
+                buildFile -> file.modifyBuildGradleFile(oldPackage, newPackage)
                 //修改layout文件
                 else -> file.modifyLayoutXml(oldPackage)
             }

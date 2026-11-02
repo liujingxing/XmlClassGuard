@@ -1,0 +1,6 @@
+apply plugin: 'com.android.library'
+android {
+    namespace = 'fixture.library'
+    compileSdk = 37
+    sourceSets.main.manifest.srcFile('custom/main.xml')
+}

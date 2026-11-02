@@ -1,0 +1,12 @@
+// Force the dependency to finish evaluation before applying XmlClassGuard.
+evaluationDependsOn(':lib')
+apply plugin: 'com.android.application'
+apply plugin: 'xml-class-guard'
+android {
+    namespace = "fixture.${project.name}"
+    compileSdk = 37
+    sourceSets.main.manifest.srcFile('custom/main.xml')
+}
+androidComponents.onVariants(androidComponents.selector().all()) { variant ->
+    variant.sources.manifests.addStaticManifestFile('custom/additional.xml')
+}
