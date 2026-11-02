@@ -30,6 +30,7 @@ val whiteList = arrayListOf(
 )
 
 fun Project.findPackage(): String {
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) return requireNotNull(kmpAndroidTarget().namespace)
     if (AgpVersion.versionCompare("4.2.0") >= 0) {
         val namespace = extensions.getByType(CommonExtension::class.java).namespace
         if (namespace != null) {
@@ -42,6 +43,7 @@ fun Project.findPackage(): String {
 
 //返回java/kotlin代码目录,可能有多个
 fun Project.javaDirs(variantName: String): List<File> {
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) return kmpJavaDirs(variantName)
     val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
@@ -59,7 +61,11 @@ fun Project.javaDirs(variantName: String): List<File> {
     return javaDirs
 }
 
+fun Project.referenceDirs(variantName: String): List<File> =
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) kmpReferenceDirs() else javaDirs(variantName)
+
 fun Project.aidlDirs(variantName: String): List<File> {
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) return emptyList()
     val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
@@ -89,6 +95,7 @@ fun Project.findXmlDirs(variantName: String, vararg dirName: String): ArrayList<
 
 //返回res目录,可能有多个
 fun Project.resDirs(variantName: String): List<File> {
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) return kmpResourceDirs()
     val sourceSet = extensions.getByType(CommonExtension::class.java).sourceSets
     val nameSet = mutableSetOf<String>()
     nameSet.add("main")
@@ -108,6 +115,7 @@ fun Project.resDirs(variantName: String): List<File> {
 
 // Read the main source set directly, independently of variants and added manifests.
 fun Project.manifestFile(): File {
+    if (plugins.hasPlugin(KMP_ANDROID_PLUGIN)) return kmpManifestFile()
     val main = extensions.getByType(CommonExtension::class.java).sourceSets.getByName("main")
     val sourceProvider = main as? SourceProvider
         ?: error("Cannot read the main Manifest for $path: unsupported source set ${main.javaClass.name}")
@@ -119,21 +127,26 @@ fun Project.findDependencyAndroidProject(
     projects: MutableList<Project>,
     names: List<String> = mutableListOf("api", "implementation")
 ) {
-    names.forEach { name ->
-        val dependencyProjects = configurations.getByName(name).dependencies
+    val visited = projects.toMutableSet().apply { add(this@findDependencyAndroidProject) }
+    fun collect(current: Project, scopes: List<String>) {
+        val configurations = if (current.plugins.hasPlugin(KMP_ANDROID_PLUGIN)) {
+            current.kmpDependencyConfigurations(scopes)
+        } else scopes
+        configurations.flatMap { current.configurations.findByName(it)?.dependencies.orEmpty() }
             .filterIsInstance<ProjectDependency>()
-            .mapNotNull { rootProject.findProject(it.path) }
-            .filter { it.isAndroidProject() }
-        projects.addAll(dependencyProjects)
-        dependencyProjects.forEach {
-            it.findDependencyAndroidProject(projects, mutableListOf("api"))
-        }
+            .mapNotNull { current.rootProject.findProject(it.path) }
+            .filter { it.isAndroidProject() && visited.add(it) }
+            .forEach {
+                projects.add(it)
+                collect(it, listOf("api", "implementation"))
+            }
     }
+    collect(this, names)
 }
 
 fun Project.isAndroidProject() =
     plugins.hasPlugin("com.android.application")
-            || plugins.hasPlugin("com.android.library")
+            || plugins.hasPlugin("com.android.library") || plugins.hasPlugin(KMP_ANDROID_PLUGIN)
 
 //查找dir所在的Project，dir不存在，返回null
 fun Project.findLocationProject(dir: String, variantName: String): Project? {
@@ -145,7 +158,7 @@ fun Project.findLocationProject(dir: String, variantName: String): Project? {
     val dependencyProjects = mutableListOf<Project>()
     findDependencyAndroidProject(dependencyProjects)
     dependencyProjects.forEach {
-        val project = it.findLocationProject(dir, variantName)
+        val project = it.takeIf { candidate -> candidate.javaDirs(variantName).any { root -> File(root, packageName).exists() } }
         if (project != null) return project
     }
     return null

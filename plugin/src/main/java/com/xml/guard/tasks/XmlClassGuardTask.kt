@@ -11,7 +11,7 @@ import com.xml.guard.utils.findLocationProject
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.findXmlDirs
 import com.xml.guard.utils.getDirPath
-import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.referenceDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.removeSuffix
 import com.xml.guard.utils.replaceWords
@@ -122,7 +122,7 @@ open class XmlClassGuardTask @Inject constructor(
 
 
     private fun replaceJavaText(project: Project, mapping: Map<String, String>) {
-        val javaDirs = project.javaDirs(variantName)
+        val javaDirs = project.referenceDirs(variantName)
         //遍历所有Java\Kt文件，替换混淆后的类的引用，import及new对象的地方
         project.files(javaDirs).asFileTree.forEach { javaFile ->
             var replaceText = javaFile.readText()

@@ -1,13 +1,14 @@
 package com.xml.guard.model
 
 import com.xml.guard.utils.KtFileParser
-import com.xml.guard.utils.findLocationProject
+import com.xml.guard.utils.findDependencyAndroidProject
+import com.xml.guard.utils.javaDirs
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.getDirPath
 import com.xml.guard.utils.inClassNameBlackList
 import com.xml.guard.utils.inPackageNameBlackList
 import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.referenceDirs
 import com.xml.guard.utils.removeSuffix
 import com.xml.guard.utils.toLetterStr
 import com.xml.guard.utils.toUpperLetterStr
@@ -42,26 +43,30 @@ class Mapping {
     //遍历文件夹下的所有直接子类，混淆文件名及移动目录
     fun obfuscateAllClass(project: Project, variantName: String): MutableMap<String, String> {
         val classMapped = mutableMapOf<String, String>()
+        val sourceProjects = mutableListOf<Project>(project)
+        project.findDependencyAndroidProject(sourceProjects)
         val iterator = dirMapping.iterator()
         while (iterator.hasNext()) {
             val entry = iterator.next()
             val rawDir = entry.key
-            val locationProject = project.findLocationProject(rawDir, variantName)
-            if (locationProject == null) {
+            val dirPath = rawDir.replace(".", File.separator)
+            val locations = sourceProjects.distinct().filter { candidate ->
+                candidate.javaDirs(variantName).any { File(it, dirPath).isDirectory }
+            }
+            if (locations.isEmpty()) {
                 iterator.remove()
                 continue
             }
-            val manifestPackage = locationProject.findPackage()
-            //过滤目录的直接子文件
-            val dirPath = rawDir.replace(".", File.separator) //xx.xx  不带文件名
-            val childFiles = locationProject.javaDirs(variantName).flatMap {
-                File(it, dirPath).listFiles { f ->
-                    val filename = f.name
-                    f.isFile && (filename.endsWith(".java") || filename.endsWith(".kt"))
-                }?.toList() ?: emptyList()
-            }
-            if (childFiles.isEmpty()) continue
-            for (file in childFiles) {
+            // A source package can span the app and several Android/KMP dependencies.
+            val childFiles = locations.flatMap { location ->
+                location.referenceDirs(variantName).flatMap { root ->
+                    File(root, dirPath).listFiles { file ->
+                        file.isFile && (file.extension == "java" || file.extension == "kt")
+                    }?.map { location to it } ?: emptyList()
+                }
+            }.distinctBy { it.second.absoluteFile }
+            for ((locationProject, file) in childFiles) {
+                val manifestPackage = locationProject.findPackage()
                 val rawClassPath = "${rawDir}.${file.name.removeSuffix()}" //原始 xx.Xxx
                 //已经混淆
                 if (isObfuscated(rawClassPath)) continue

@@ -1,0 +1,6 @@
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+apply plugin: 'com.android.kotlin.multiplatform.library'
+kotlin {
+    jvm()
+    android { namespace = 'sample.transitive'; compileSdk = 37; minSdk = 24 }
+}

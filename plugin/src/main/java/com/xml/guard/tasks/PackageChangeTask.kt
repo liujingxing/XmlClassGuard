@@ -5,7 +5,7 @@ import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.findXmlDirs
 import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.referenceDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.replaceWords
 import org.gradle.api.DefaultTask
@@ -54,7 +54,7 @@ open class PackageChangeTask @Inject constructor(
             }
         }
 
-        val javaDirs = javaDirs(variantName)
+        val javaDirs = referenceDirs(variantName)
         //2.修改 kt/java文件
         files(javaDirs).asFileTree.forEach { javaFile ->
             javaFile.readText()
