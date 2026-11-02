@@ -11,6 +11,8 @@
 
 # XmlClassGuard 简介
 
+`1.2.8-beta1` 普通 Android 项目的最低要求为 **AGP 8.5.0、Gradle 8.11、JDK 17**；新版 KMP Android library 集成最低为 **AGP 9.0.0、Gradle 9.1.0、JDK 17**。同时需要满足所选 AGP 自身的 Gradle 要求。已用已发布版本完成最低组合的扫描、源码改写和 Debug APK 构建，详见[兼容性验证记录](plugin/src/test/fixtures/compatibility/README.md)。
+
 - `XmlClassGuard`是一个可混淆Android 4大组件、自定义View等任意类的插件
 
 - `XmlClassGuard`可以看作是`ProGuard`的一个补充，跟`ProGuard`没有任何关系，也不会有任何冲突
