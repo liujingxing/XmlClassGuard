@@ -1,4 +1,11 @@
 pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "xml-class-guard") {
+                useModule("com.github.liujingxing:XmlClassGuard:${requested.version}")
+            }
+        }
+    }
     repositories {
         gradlePluginPortal()
         google()

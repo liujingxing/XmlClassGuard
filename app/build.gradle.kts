@@ -1,12 +1,29 @@
 import com.android.build.api.dsl.ApplicationExtension
+import com.xml.guard.entensions.GuardExtension
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.navigation.safeargs)
+    alias(libs.plugins.xmlclassguard)
 }
 // apply(from = "aabresguard.gradle.kts")
 
-// apply(from = "xmlclassguard.gradle.kts")
+extensions.configure<GuardExtension> {
+    // Enable resource guard integrations only when the corresponding plugin is applied.
+    findAabConstraintReferencedIds = false
+    findAndConstraintReferencedIds = false
+    mappingFile = file("xml-class-mapping.txt")
+    packageChange = hashMapOf(
+        "com.ljx.example" to "ab.cd",
+        "com.ljx.base" to "ggg.kkk",
+        "com.ljx.kts" to "ff.dd"
+    )
+    moveDir = hashMapOf(
+        "com.ljx.example" to "ef.gh",
+        "com.ljx.base" to "zzzz.hhhh",
+        "com.ljx.kts" to "ddd.xxx"
+    )
+}
 
 extensions.configure<ApplicationExtension> {
     namespace = "com.ljx.example"

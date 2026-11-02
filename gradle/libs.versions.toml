@@ -12,7 +12,7 @@ espresso = "3.7.0"
 asm = "9.11.1"
 aabresguard = "0.1.10"
 andresguard = "1.2.21"
-xmlclassguard = "1.2.7"
+xmlclassguard = "1.2.8-beta1"
 
 [libraries]
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -37,3 +37,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
+xmlclassguard = { id = "xml-class-guard", version.ref = "xmlclassguard" }
