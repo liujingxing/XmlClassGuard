@@ -1,0 +1,38 @@
+[versions]
+agp = "9.5.0"
+kotlin = "2.4.21"
+core = "1.19.1"
+appcompat = "1.8.0"
+material = "1.14.0"
+constraintlayout = "2.2.2"
+navigation = "2.10.2"
+junit = "4.13.2"
+androidxTestJunit = "1.3.0"
+espresso = "3.7.0"
+asm = "9.11.1"
+aabresguard = "0.1.10"
+andresguard = "1.2.21"
+xmlclassguard = "1.2.7"
+
+[libraries]
+androidx-core = { module = "androidx.core:core-ktx", version.ref = "core" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
+navigation-ui = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
+espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+agp-api = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+aabresguard = { module = "com.bytedance.android:aabresguard-plugin", version.ref = "aabresguard" }
+andresguard = { module = "com.tencent.mm:AndResGuard-gradle-plugin", version.ref = "andresguard" }
+sevenzip = { module = "com.tencent.mm:SevenZip", version.ref = "andresguard" }
+xmlclassguard = { module = "com.github.liujingxing:XmlClassGuard", version.ref = "xmlclassguard" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
