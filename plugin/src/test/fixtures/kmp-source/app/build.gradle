@@ -1,0 +1,12 @@
+apply plugin: 'com.android.application'
+apply plugin: 'xml-class-guard'
+android {
+    namespace = 'sample.app'
+    compileSdk = 37
+    defaultConfig { minSdk = 24; targetSdk = 37; versionCode = 1; versionName = '1.0' }
+}
+dependencies { implementation projects.shared }
+xmlClassGuard {
+    moveDir = ['sample.common': 'moved.common', 'sample.shared': 'moved.shared']
+    packageChange = ['sample.shared': 'updated.shared']
+}

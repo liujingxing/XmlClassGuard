@@ -1,0 +1,16 @@
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
+apply plugin: 'com.android.kotlin.multiplatform.library'
+kotlin {
+    android {
+        namespace = 'sample.shared'
+        compileSdk = 37
+        minSdk = 24
+        androidResources.enable = true
+    }
+    jvm()
+    sourceSets {
+        commonMain { dependencies { api(project(':transitive')) } }
+        intermediateMain { dependsOn(commonMain) }
+        androidMain { dependsOn(intermediateMain); kotlin.srcDir('custom/android') }
+    }
+}

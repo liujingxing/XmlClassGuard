@@ -6,7 +6,7 @@ import com.xml.guard.utils.allDependencyAndroidProjects
 import com.xml.guard.utils.findPackage
 import com.xml.guard.utils.findXmlDirs
 import com.xml.guard.utils.insertImportXxxIfAbsent
-import com.xml.guard.utils.javaDirs
+import com.xml.guard.utils.referenceDirs
 import com.xml.guard.utils.manifestFile
 import com.xml.guard.utils.replaceWords
 import org.gradle.api.DefaultTask
@@ -44,7 +44,7 @@ open class MoveDirTask @Inject constructor(
         dirs.add(manifestFile())
         val aidlDirs = aidlDirs(variantName)
         dirs.addAll(aidlDirs)
-        val javaDirs = javaDirs(variantName)
+        val javaDirs = referenceDirs(variantName)
         dirs.addAll(javaDirs)
         val moveDirs = mutableListOf<File>()
         moveDirs.addAll(aidlDirs)

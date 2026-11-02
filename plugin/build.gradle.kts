@@ -37,6 +37,7 @@ java {
 
 dependencies {
     compileOnly(gradleApi())
+    compileOnly(libs.kotlin.gradle.plugin)
     // Match the Groovy runtime bundled with the consuming Gradle distribution.
     compileOnly(localGroovy())
     compileOnly(libs.asm)

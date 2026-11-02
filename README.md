@@ -266,3 +266,11 @@ class mapping:
 
 
 
+
+## KMP Android 模块支持
+
+在 Android app 应用 XmlClassGuard 后，可以检索其依赖的使用 `com.android.kotlin.multiplatform.library` 的 shared 模块，包括 Android compilation 关联的 `commonMain`、`androidMain` 和 `dependsOn` 中间层源码。无需在 shared 中重复应用 XmlClassGuard。
+
+类或包名修改会同步 shared 内其他 target 及测试源码的引用和对应声明，避免只修改 Android 源码后留下旧的 commonMain 引用。当前已在 AGP 9.5.0 / Kotlin 2.4.21 下验证 Android 与 JVM 的源码改写及构建。
+
+Android 资源与 Manifest 目前使用新 KMP 插件的默认目录；通过 Variant API 添加的自定义资源、Java、Manifest 路径及 `composeResources` 尚不支持。旧 KMP Android 集成、iOS/Native 构建及发布尚未验证。完整测试方法见 [KMP 回归说明](plugin/src/test/fixtures/kmp-source/README.md)。

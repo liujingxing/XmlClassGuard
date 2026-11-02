@@ -1,0 +1,30 @@
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.5.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21'
+        classpath files(providers.gradleProperty('guardPluginJar').get())
+    }
+}
+tasks.register('verifyKmpSources') {
+    doLast {
+        def utils = com.xml.guard.utils.ProjectExtKt
+        def app = project(':app')
+        def shared = project(':shared')
+        def deps = []
+        utils.findDependencyAndroidProject(app, deps, ['api', 'implementation'])
+        assert deps*.path == [':shared', ':transitive']
+        def dirs = utils.javaDirs(shared, 'Debug')
+        assert dirs.contains(shared.file('custom/android'))
+        assert dirs.contains(shared.file('src/commonMain/kotlin'))
+        assert dirs.contains(shared.file('src/intermediateMain/kotlin'))
+        assert !dirs.contains(shared.file('src/jvmMain/kotlin'))
+        assert !dirs.contains(shared.file('src/commonTest/kotlin'))
+        assert utils.findPackage(shared) == 'sample.shared'
+        assert utils.resDirs(shared, 'Debug') == [shared.file('src/androidMain/res')]
+        assert utils.manifestFile(shared) == shared.file('src/androidMain/AndroidManifest.xml')
+        assert !utils.manifestFile(project(':transitive')).exists()
+        assert utils.resDirs(project(':transitive'), 'Debug').empty
+        println 'PASS KMP sources, hierarchy, transitive dependencies, optional manifest, and disabled resources'
+    }
+}
