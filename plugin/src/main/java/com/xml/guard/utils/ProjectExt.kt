@@ -155,7 +155,7 @@ fun findClassByLayoutXml(text: String, packageName: String): List<ClassInfo> {
     val classInfoList = mutableListOf<ClassInfo>()
     val childrenList = XmlParser(false, false).parseText(text).breadthFirst()
     val destAttributes =
-        mutableListOf("tools:context", "app:layout_behavior", "app:layoutManager", "android:name")
+        mutableListOf("tools:context", "app:layout_behavior", "app:layoutManager", "android:name", "android:targetClass")
     for (children in childrenList) {
         val childNode = children as? Node ?: continue
         destAttributes.forEach { attributeName ->

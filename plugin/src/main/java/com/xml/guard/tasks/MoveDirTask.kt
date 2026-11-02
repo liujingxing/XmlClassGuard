@@ -96,6 +96,11 @@ open class MoveDirTask @Inject constructor(
 
     private fun File.replaceText(map: Map<String, String>, manifestPackage: String?, isManifest: Boolean) {
         var replaceText = readText()
+        // targetPackage identifies the installed application, not the class's source package.
+        val targetPackagePattern = Regex("""android:targetPackage\s*=\s*(["']).*?\1""")
+        val targetPackages = if (extension == "xml") {
+            targetPackagePattern.findAll(replaceText).map { it.value }.toList().iterator()
+        } else null
         map.forEach { (oldPath, newPath) ->
             replaceText =
                 if (isManifest && oldPath == manifestPackage) {
@@ -114,6 +119,9 @@ open class MoveDirTask @Inject constructor(
                     .replaceWords("$newPath.BuildConfig", "$oldPath.BuildConfig")
                     .replaceWords("$newPath.databinding", "$oldPath.databinding")
             }
+        }
+        if (targetPackages != null) {
+            replaceText = targetPackagePattern.replace(replaceText) { targetPackages.next() }
         }
         writeText(replaceText)
     }

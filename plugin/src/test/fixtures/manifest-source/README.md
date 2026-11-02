@@ -13,6 +13,7 @@ GUARD_VERIFY_ASSEMBLE=true ruby plugin/src/test/fixtures/manifest-source/run-reg
 - AndResGuard/AabResGuard 任务在 `afterEvaluate` 中晚注册，检查 Debug/Release 的扫描依赖。
 - 开启集成但未提供对应资源任务，检查配置失败与明确错误信息。
 - 在 Kotlin 源码目录中实际执行类混淆、目录移动、包名修改，检查自定义 Manifest 和源码结果；开启 `GUARD_VERIFY_ASSEMBLE=true` 后分别重新生成 Debug APK。
+- 检查 `xml/shortcuts.xml` 与 `xml-v25/shortcuts.xml`：识别仅被 `android:targetClass` 引用的类，更新混淆/移动后的类路径，保持 `targetPackage` 和外部应用 Intent 不变。
 
 直接运行只读检查：
 
